@@ -1,8 +1,11 @@
 {
   "name": "se-fastapi-dev",
-  "image": "mcr.microsoft.com/devcontainers/python:3.11",
-  "features": { "ghcr.io/devcontainers/features/common-utils:2": {} },
-"postCreateCommand": "pip install -U pip && pip install fastapi uvicorn[standard] jinja2 pytest pytest-cov ruff black mypy starlette httpx types-requests",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
+  "remoteUser": "vscode",
+  "forwardPorts": [8000, 5173],
   "customizations": {
     "vscode": {
       "extensions": [
@@ -10,9 +13,11 @@
         "ms-python.vscode-pylance",
         "ms-azuretools.vscode-docker",
         "github.vscode-github-actions",
-        "tamasfe.even-better-toml"
+        "tamasfe.even-better-toml",
+        "esbenp.prettier-vscode",
+        "dbaeumer.vscode-eslint"
       ]
     }
   },
-  "remoteUser": "vscode"
+  "postCreateCommand": "/bin/bash .devcontainer/postCreate.sh"
 }
