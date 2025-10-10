@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-8">
+    <div class="card shadow-sm"><div class="card-body">
+      <h1 class="h4 mb-3">Plan your week’s meals</h1>
+      <form class="row g-3" method="post" action="#" onsubmit="return false;">
+        <div class="col-md-6">
+          <label class="form-label">Diet</label>
+          <select class="form-select" id="diet">
+            <option>Balanced</option><option>Vegan</option><option>Keto</option>
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Daily calories</label>
+          <input type="number" class="form-control" id="calories" placeholder="e.g., 2200">
+        </div>
+        <div class="col-12">
+          <button class="btn btn-primary" id="generate">Generate weekly plan</button>
+        </div>
+      </form>
+    </div></div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card shadow-sm"><div class="card-body">
+      <h2 class="h6">Status</h2>
+      <code id="status">Ready</code>
+    </div></div>
+  </div>
+</div>
+{% endblock %}
