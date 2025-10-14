@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login · Weeklies</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  <script src="{{ url_for('static', filename='script.js') }}" defer></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="container">
+    <a class="brand" href="{{ url_for('index') }}">
+      <span class="logo" aria-hidden="true"></span> Weeklies
+    </a>
+    <nav>
+      <a href="{{ url_for('login') }}">Login</a>
+    </nav>
+  </div>
+</header>
+
+<main class="main">
+  <div class="container">
+    {% if error %}
+    <div class="flash danger" data-autohide="4500">{{ error }}</div>
+    {% endif %}
+
+    <div class="auth">
+      <div class="card">
+        <div class="card-header">Login</div>
+        <div class="card-body">
+          <form action="{{ url_for('login') }}" method="post">
+            <label for="email">Email</label>
+            <input class="input" type="email" id="email" name="email" required />
+
+            <label for="password">Password</label>
+            <input class="input" type="password" id="password" name="password" required />
+
+            <input type="submit" value="Login" class="btn btn-primary btn-block" />
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="footer">
+  <div class="container">© 2025 Weeklies</div>
+</footer>
+</body>
+</html>

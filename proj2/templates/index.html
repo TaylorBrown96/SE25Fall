@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Home · Weeklies</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  <script src="{{ url_for('static', filename='script.js') }}" defer></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="container">
+    <a class="brand" href="{{ url_for('index') }}">
+      <span class="logo" aria-hidden="true"></span> Weeklies
+    </a>
+    <nav>
+      <a href="{{ url_for('index') }}">Home</a>
+      <a href="{{ url_for('profile') }}">Profile</a>
+      <a href="{{ url_for('db_view') }}">DB</a>
+      <a href="{{ url_for('logout') }}" data-confirm="Log out now?">Logout</a>
+    </nav>
+  </div>
+</header>
+
+<main class="main">
+  <div class="container">
+    <div class="page-title">
+      <h1>Hello {{ username }}</h1>
+      <p class="hide-sm">Welcome back.</p>
+    </div>
+
+    <div class="card max-w-md">
+      <div class="card-body">
+        <p>Welcome to Weeklies! Use the buttons below to jump around.</p>
+        <div class="btn-row mt-4">
+          <a class="btn btn-primary" href="{{ url_for('profile') }}">Profile</a>
+          <a class="btn btn-outline" href="{{ url_for('logout') }}" data-confirm="Log out now?">Logout</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="footer">
+  <div class="container">© 2025 Weeklies</div>
+</footer>
+</body>
+</html>
