@@ -1,0 +1,17 @@
+# Core framework
+fastapi
+uvicorn[standard]
+jinja2
+
+# Optional: for static files/templates
+python-multipart
+
+# Dev & testing utilities (safe to keep)
+pytest
+pytest-cov
+httpx
+ruff
+black
+mypy
+types-requests
+starlette
