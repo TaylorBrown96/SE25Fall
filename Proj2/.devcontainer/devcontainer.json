@@ -1,0 +1,18 @@
+{
+  "name": "se-fastapi-dev",
+  "image": "mcr.microsoft.com/devcontainers/python:3.11",
+  "features": { "ghcr.io/devcontainers/features/common-utils:2": {} },
+"postCreateCommand": "pip install -U pip && pip install fastapi uvicorn[standard] jinja2 pytest pytest-cov ruff black mypy starlette httpx types-requests",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-azuretools.vscode-docker",
+        "github.vscode-github-actions",
+        "tamasfe.even-better-toml"
+      ]
+    }
+  },
+  "remoteUser": "vscode"
+}
