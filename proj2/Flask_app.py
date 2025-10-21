@@ -14,6 +14,7 @@ from datetime import timedelta
 from functools import wraps
 from typing import Optional, Iterable
 from pathlib import Path
+from flask_wtf import CSRFProtect
 from flask import (
     Flask,
     render_template,
@@ -39,6 +40,7 @@ ENV_PATH = Path(__file__).with_name(".env")  # <repo>/proj2/.env
 load_dotenv(dotenv_path=ENV_PATH, override=True)
 
 app = Flask(__name__)
+CSRFProtect(app)
 
 # Secret + session settings (env-driven; local-safe defaults)
 app.config["SECRET_KEY"] = os.getenv("FLASK_SECRET_KEY", "dev-insecure")
@@ -57,7 +59,8 @@ ADMIN_EMAILS: set[str] = {
     for e in os.getenv("ADMIN_EMAILS", "").split(",")
     if e.strip()
 }
-print(f"[BOOT] CWD={os.getcwd()}  ENV_PATH={ENV_PATH}  ADMIN_EMAILS={ADMIN_EMAILS}")
+# Turn it on for debugging purposes
+#print(f"[BOOT] CWD={os.getcwd()}  ENV_PATH={ENV_PATH}  ADMIN_EMAILS={ADMIN_EMAILS}")
 
 # Local Swagger UI and OpenAPI JSON at /apidocs and /apispec_1.json
 Swagger(app)
@@ -201,8 +204,6 @@ def login():
 
             # Simple admin allowlist (optional)
             session["is_admin"] = is_admin_email(user[3])
-            # email_value = (user[3] or "").strip().lower()  # normalize
-            # session["is_admin"] = email_value in ADMIN_EMAILS
 
             # 30-minute rolling session
             session.permanent = True
