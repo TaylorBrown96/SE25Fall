@@ -3,13 +3,52 @@ import math
 from sqlQueries import *
 from datetime import timedelta
 from werkzeug.security import check_password_hash, generate_password_hash
-from flask import Flask, render_template, url_for, redirect, request, session
-
+from flask import Flask, render_template, url_for, redirect, request, session, jsonify, Blueprint
+from flasgger import Swagger, swag_from
+from dotenv import load_dotenv
+load_dotenv()
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'your_secret_key_here'
+app.config["SECRET_KEY"] = os.getenv("FLASK_SECRET_KEY", "dev-insecure")
+app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(minutes=30)
+
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 
 db_file = os.path.join(os.path.dirname(__file__), 'CSC510_DB.db')
+
+Swagger(app)
+# --- minimal API blueprint for documentation & testing ---
+api_bp = Blueprint("api", __name__, url_prefix="/api")
+
+@api_bp.get("/health")
+@swag_from({
+    "tags": ["meta"],
+    "summary": "Health check",
+    "responses": {200: {"description": "OK"}}
+})
+def health():
+    return jsonify(status="ok")
+
+@api_bp.get("/me")
+@swag_from({
+    "tags": ["user"],
+    "summary": "Current user (from session)",
+    "responses": {
+        200: {"description": "User info"},
+        401: {"description": "Not logged in"}
+    }
+})
+def me():
+    if "username" not in session:
+        return jsonify(error="unauthorized"), 401
+    return jsonify({
+        "Fname": session.get("Fname"),
+        "Lname": session.get("Lname"),
+        "Wallet": session.get("Wallet"),
+    })
+
+app.register_blueprint(api_bp)
 
 # Home route
 @app.route('/')
