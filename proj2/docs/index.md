@@ -13,3 +13,4 @@ make export-openapi
 
 # terminal 3 (serve docs)
 mkdocs serve
+```
