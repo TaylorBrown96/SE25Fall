@@ -1,0 +1,36 @@
+site_name: SE25Fall – Project 2
+site_url: http://localhost:8000
+repo_url: https://github.com/TaylorBrown96/SE25Fall
+docs_dir: proj2/docs
+
+theme:
+  name: material
+
+nav:
+  - Overview: index.md
+  - Architecture: architecture.md
+  - API:
+      - Endpoints (OpenAPI): api/openapi.md
+      - Python Reference: api/reference.md
+  - Contributing: contributing.md
+  - Changelog: changelog.md
+
+markdown_extensions:
+  - admonition
+  - toc:
+      permalink: true
+  - pymdownx.superfences
+  - pymdownx.details
+  - tables
+  - attr_list
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          # allow importing modules from proj2
+          paths: [proj2]
+          options:
+            docstring_style: google
+            show_source: true

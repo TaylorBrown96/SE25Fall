@@ -1,0 +1,41 @@
+{
+  "definitions": {},
+  "info": {
+    "description": "powered by Flasgger",
+    "termsOfService": "/tos",
+    "title": "A swagger API",
+    "version": "0.0.1"
+  },
+  "paths": {
+    "/api/health": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "summary": "Health check",
+        "tags": [
+          "meta"
+        ]
+      }
+    },
+    "/api/me": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "User info"
+          },
+          "401": {
+            "description": "Not logged in"
+          }
+        },
+        "summary": "Current user (from session)",
+        "tags": [
+          "user"
+        ]
+      }
+    }
+  },
+  "swagger": "2.0"
+}
