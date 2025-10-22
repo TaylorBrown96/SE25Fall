@@ -1,7 +1,9 @@
 import os
+import re
 import math
 from sqlQueries import *
 from datetime import timedelta
+from sqlite3 import IntegrityError
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask import Flask, render_template, url_for, redirect, request, session
 
@@ -57,6 +59,67 @@ def logout():
     session.pop('Wallet', None)
     session.pop('Preferences', None)
     return redirect(url_for('login'))
+
+# Registration route
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        # ---- Gather form fields ----
+        fname = request.form.get('fname', '').strip()
+        lname = request.form.get('lname', '').strip()
+        email = request.form.get('email', '').strip().lower()
+        phone = request.form.get('phone', '').strip()
+        password = request.form.get('password', '')
+        confirm_password = request.form.get('confirm_password', '')
+        # Hidden CSV fields set by the page JS
+        allergies = (request.form.get('allergies') or '').strip()       # e.g., "Peanuts,Milk"
+        preferences = (request.form.get('preferences') or '').strip()   # e.g., "Vegan,Budget,Spicy"
+
+        # ---- Basic validations ----
+        if not fname or not lname:
+            return render_template('register.html', error="First and last name are required")
+        if not email or not re.match(r"^[^@]+@[^@]+\.[^@]+$", email):
+            return render_template('register.html', error="Please enter a valid email address")
+        if password != confirm_password:
+            return render_template('register.html', error="Passwords do not match")
+        if len(password) < 6:
+            return render_template('register.html', error="Password must be at least 6 characters")
+
+        # Normalize phone to digits only; store as-is if you prefer original formatting
+        digits_only = re.sub(r"\D+", "", phone)
+        if len(digits_only) < 7:  # very light sanity check
+            return render_template('register.html', error="Please enter a valid phone number")
+
+        # ---- Check existing user and insert ----
+        conn = create_connection(db_file)
+        try:
+            existing_user = fetch_one(conn, "SELECT 1 FROM User WHERE email = ?", (email,))
+            if existing_user:
+                return render_template('register.html', error="Email already registered")
+
+            password_hashed = generate_password_hash(password)
+
+            # If your User table includes an `allergies` TEXT column (recommended), use this:
+            execute_query(
+                conn,
+                """
+                INSERT INTO User
+                    (first_name, last_name, email, phone, password_HS, wallet, preferences, allergies)
+                VALUES
+                    (?,          ?,         ?,     ?,     ?,           ?,      ?,            ?)
+                """,
+                (fname, lname, email, digits_only, password_hashed, 0.0, preferences, allergies)
+            )
+
+        except IntegrityError:
+            # In case there is a unique constraint on email and it triggers
+            return render_template('register.html', error="Email already registered")
+        finally:
+            close_connection(conn)
+
+        return redirect(url_for('login'))
+
+    return render_template('register.html')
 
 # Profile route
 @app.route('/profile')
