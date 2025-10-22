@@ -548,3 +548,61 @@ main.main {
 .footer {
   margin-top: auto;
 }
+
+/* ====== Compact "Today’s Menu" card ====== */
+.card.compact .card-body { padding: 8px 12px; }           /* tighter top/bottom */
+.card.compact h2, .card.compact .h6 { margin: 0 0 4px; }  /* smaller heading gap */
+.card.compact .list { margin: 0; }
+.card.compact .list-item { padding: 2px 0; }
+
+/* ====== Wider, more spacious calendar ====== */
+.calendar-wrap.calendar-wide { max-width: none; }  /* use full container width */
+
+.cal-grid {
+  /* wider columns that scale; keeps 7 across but grows with screen */
+  grid-template-columns: repeat(7, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.day-cell {
+  /* taller cells that scale with viewport but stay sane on small screens */
+  min-height: clamp(120px, 14vw, 190px);
+}
+
+/* Meal badges readable when stacked */
+.badge-stack .badge {
+  font-size: 0.82rem;
+  padding: 6px 8px;
+}
+
+/* Make the date number stand out a tad more in taller cells */
+.day-cell .day-num {
+  font-size: 0.95rem;
+  opacity: 0.85;
+}
+
+/* Responsive tweaks */
+@media (max-width: 900px) {
+  .cal-grid { gap: 8px; grid-template-columns: repeat(7, minmax(90px, 1fr)); }
+  .day-cell { min-height: clamp(95px, 12vw, 150px); }
+}
+@media (max-width: 640px) {
+  .cal-grid { gap: 6px; grid-template-columns: repeat(7, minmax(70px, 1fr)); }
+  .day-cell { min-height: clamp(80px, 11vw, 120px); }
+  .badge-stack .badge { font-size: 0.76rem; }
+}
+
+/* Stop background repeating on scroll:
+   keep solid color on body; pin gradients to viewport */
+body { background: var(--bg) !important; }
+
+body::before {
+  content: "";
+  position: fixed;     /* stays put while you scroll */
+  inset: 0;
+  z-index: -1;         /* behind everything */
+  pointer-events: none;
+  background:
+    radial-gradient(1200px 600px at 10% -10%, rgba(91,140,255,0.15), transparent 40%),
+    radial-gradient(1000px 500px at 110% 10%, rgba(41,196,138,0.10), transparent 35%);
+}

@@ -12,30 +12,25 @@
     .pref-toolbar .input { max-width: 380px; }
     .bubbles { display:flex; flex-wrap:wrap; gap:12px; }
     .bubble {
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    border-radius:999px;
-    border:2px solid var(--border);
-    background: rgba(0,0,0,0.05);   /* subtle neutral backdrop */
-    color: var(--text);
-    padding: 10px 14px;
-    cursor:pointer;
-    user-select:none;
-    transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease;
-    opacity: 0.5;                   /* dim when unselected */
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      border-radius:999px;
+      border:2px solid var(--border);
+      background: rgba(0,0,0,0.05);
+      color: var(--text);
+      padding: 10px 14px;
+      cursor:pointer;
+      user-select:none;
+      transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease;
+      opacity: 0.5;
     }
-
-    .bubble:hover {
-    transform: translateY(-1px);
-    opacity: 0.7;
-    }
-
+    .bubble:hover { transform: translateY(-1px); opacity: 0.7; }
     .bubble.selected {
-    background: rgba(0,0,0,0.05);   /* keep subtle background */
-    border-color: currentColor;     /* bright border */
-    box-shadow: 0 0 6px currentColor;
-    opacity: 1;                     /* make it pop */
+      background: rgba(0,0,0,0.05);
+      border-color: currentColor;
+      box-shadow: 0 0 6px currentColor;
+      opacity: 1;
     }
     .section-title { margin: 0 0 6px; font-size: 18px; }
     .muted { color: var(--muted); font-size: 14px; margin: 0 0 12px; }
@@ -75,11 +70,13 @@
             <div class="form-row form-row--2">
               <div>
                 <label for="fname">First name</label>
-                <input class="input" id="fname" name="fname" type="text" placeholder="Taylor" required>
+                <!-- more generic placeholder -->
+                <input class="input" id="fname" name="fname" type="text" placeholder="First name" required>
               </div>
               <div>
                 <label for="lname">Last name</label>
-                <input class="input" id="lname" name="lname" type="text" placeholder="Brown" required>
+                <!-- more generic placeholder -->
+                <input class="input" id="lname" name="lname" type="text" placeholder="Last name" required>
               </div>
             </div>
             <div class="form-row form-row--2">
@@ -95,12 +92,12 @@
             <div class="form-row form-row--2">
               <div>
                 <label for="password">Password</label>
-                <input class="input" id="password" name="password" type="password" placeholder="••••••••" minlength="6" required>
+                <input class="input" id="password" name="password" type="password" placeholder="Enter a password" minlength="6" required>
                 <div class="help-text">Min 6 characters.</div>
               </div>
               <div>
                 <label for="confirm_password">Confirm password</label>
-                <input class="input" id="confirm_password" name="confirm_password" type="password" placeholder="••••••••" minlength="6" required>
+                <input class="input" id="confirm_password" name="confirm_password" type="password" placeholder="Re-enter password" minlength="6" required>
               </div>
             </div>
           </div>
@@ -156,16 +153,16 @@
   // --- Preferences bubble builder ---
   (function() {
     const DEFAULT_PREFS = [
-        'Vegan','Vegetarian','Keto','Paleo','Halal','Kosher','Low Sodium','High Protein',
-        'Dairy-Free','Gluten-Free','Spicy','Mild','Sweet','Savory','Quick Meals','Budget',
-        'Organic','Local','Seasonal','Meal Prep','Breakfast','Lunch','Dinner','Snacks',
-        'High Fiber','Low Carb','Low Fat','Sugar-Free','Nut-Free','Shellfish-Free','Soy-Free',
-        'Comfort Food','Exotic','Street Food','Fine Dining','Fast Food','Slow Cooked','Grilled',
-        'Baked','Fried','Raw','Sushi','Salads','Soups','Sandwiches','Wraps','Smoothies',
-        'Juicing','Energy Boost','Post-Workout','Pre-Workout','Family Friendly','Kid Friendly',
-        'Romantic','Entertaining','Travel Friendly','Picnic','Camping','Holiday Meals',
-        'Desserts','Cakes','Cookies','Pastries','Ice Cream','Chocolate','Coffee','Tea',
-        'Wine Pairing','Beer Pairing','Cocktails','Non-Alcoholic','Hydration','Low Caffeine'
+      'Vegan','Vegetarian','Keto','Paleo','Halal','Kosher','Low Sodium','High Protein',
+      'Dairy-Free','Gluten-Free','Spicy','Mild','Sweet','Savory','Quick Meals','Budget',
+      'Organic','Local','Seasonal','Meal Prep','Breakfast','Lunch','Dinner','Snacks',
+      'High Fiber','Low Carb','Low Fat','Sugar-Free','Nut-Free','Shellfish-Free','Soy-Free',
+      'Comfort Food','Exotic','Street Food','Fine Dining','Fast Food','Slow Cooked','Grilled',
+      'Baked','Fried','Raw','Sushi','Salads','Soups','Sandwiches','Wraps','Smoothies',
+      'Juicing','Energy Boost','Post-Workout','Pre-Workout','Family Friendly','Kid Friendly',
+      'Romantic','Entertaining','Travel Friendly','Picnic','Camping','Holiday Meals',
+      'Desserts','Cakes','Cookies','Pastries','Ice Cream','Chocolate','Coffee','Tea',
+      'Wine Pairing','Beer Pairing','Cocktails','Non-Alcoholic','Hydration','Low Caffeine'
     ];
 
     const bubblesEl = document.getElementById('bubbles');
@@ -206,54 +203,41 @@
 
       // Toggle selection on click
       el.addEventListener('click', () => {
-          if (state.selected.has(key)) {
-          state.selected.delete(key);
-          el.classList.remove('selected');   // deselect
-          } else {
-          state.selected.add(key);
-          el.classList.add('selected');      // select
-          }
-          syncHiddenFields();
+        const k = makeKey(label);
+        if (state.selected.has(k)) {
+          state.selected.delete(k);
+          el.classList.remove('selected');
+        } else {
+          state.selected.add(k);
+          el.classList.add('selected');
+        }
+        syncHiddenFields();
       });
 
       state.all.set(key, { el, label, color });
       return el;
     }
 
-    function toggleBubble(key) {
-      const item = state.all.get(key);
-      if (!item) return;
-      if (state.selected.has(key)) {
-        state.selected.delete(key);
-        item.el.classList.remove('selected');
-      } else {
-        state.selected.add(key);
-        item.el.classList.add('selected');
-      }
-      syncHiddenFields();
-    }
-
     function renderList(list) {
-        bubblesEl.innerHTML = '';
-        // LIMIT to 20 shown
-        list.slice(0, 20).forEach(label => bubblesEl.appendChild(createBubble(label)));
-        // re-apply selected classes
-        for (const key of state.selected) {
+      bubblesEl.innerHTML = '';
+      list.slice(0, 20).forEach(label => bubblesEl.appendChild(createBubble(label)));
+      // re-apply selected classes
+      for (const key of state.selected) {
         const item = state.all.get(key);
         if (item) item.el.classList.add('selected');
-        }
+      }
     }
 
     function filterList(q) {
-        const query = q.toLowerCase().trim();
-        if (!query) {
+      const query = q.toLowerCase().trim();
+      if (!query) {
         renderList(Array.from(state.all.values()).map(v => v.label));
         return;
-        }
-        const labels = Array.from(state.all.values())
+      }
+      const labels = Array.from(state.all.values())
         .map(v => v.label)
         .filter(l => l.toLowerCase().includes(query));
-        renderList(labels);
+      renderList(labels);
     }
 
     function addFromInput() {
@@ -273,10 +257,17 @@
       syncHiddenFields();
     }
 
-    function clearSelections() {
+    function clearSelectionsAndSearch() {
+      // Clear selected bubbles
       state.selected.clear();
       state.all.forEach(({ el }) => el.classList.remove('selected'));
       syncHiddenFields();
+
+      // ALSO clear the search bar text and reset the list
+      searchEl.value = '';
+      filterList('');
+      // optional: return focus to the search field
+      searchEl.focus();
     }
 
     function syncHiddenFields() {
@@ -292,10 +283,10 @@
     // Events
     searchEl.addEventListener('input', (e) => filterList(e.target.value));
     searchEl.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') { e.preventDefault(); addFromInput(); }
+      if (e.key === 'Enter') { e.preventDefault(); addFromInput(); }
     });
-    clearBtn.addEventListener('click', clearSelections);
-    })();
+    clearBtn.addEventListener('click', clearSelectionsAndSearch);
+  })();
 
   // --- Serialize allergies to CSV for your existing /register route ---
   (function() {
