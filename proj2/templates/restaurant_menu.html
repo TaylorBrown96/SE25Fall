@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ restaurant.name }} Menu · Weeklies</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  <script src="{{ url_for('static', filename='script.js') }}" defer></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="container">
+    <a class="brand" href="{{ url_for('index') }}"><span class="logo"></span> Weeklies</a>
+    <nav>
+      <a href="{{ url_for('index') }}">Home</a>
+      <a href="{{ url_for('profile') }}">Profile</a>
+      <a href="{{ url_for('restaurants') }}">Restaurants</a>
+      <a href="{{ url_for('db_view') }}">DB</a>
+      <a href="{{ url_for('logout') }}" data-confirm="Log out now?">Logout</a>
+    </nav>
+  </div>
+</header>
+
+<main class="main">
+  <div class="container">
+    <!-- Restaurant Header -->
+    <div class="card mb-4">
+      <div class="card-body">
+        <div class="restaurant-header">
+          <div>
+            <h1 class="h3 mb-2">{{ restaurant.name }}</h1>
+            {% if restaurant.description %}
+              <p class="restaurant-description">{{ restaurant.description }}</p>
+            {% endif %}
+          </div>
+          <div class="restaurant-status">
+            <span class="badge {% if restaurant.status == 'Open' %}success{% else %}warning{% endif %}">
+              {{ restaurant.status }}
+            </span>
+          </div>
+        </div>
+        
+        <div class="restaurant-info">
+          <div class="info-grid">
+            <div class="info-item">
+              <strong>📍 Address</strong>
+              <p>{{ restaurant.address_full }}</p>
+            </div>
+            {% if restaurant.phone %}
+              <div class="info-item">
+                <strong>📞 Phone</strong>
+                <p>{{ restaurant.phone }}</p>
+              </div>
+            {% endif %}
+            {% if restaurant.hours %}
+              <div class="info-item">
+                <strong>🕒 Hours</strong>
+                <p>{{ restaurant.hours }}</p>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Menu Section -->
+    <div class="menu-section">
+      <div class="menu-header">
+        <h2 class="h4">Menu Items</h2>
+        <div class="menu-actions">
+          <button id="viewCartBtn" class="btn btn-outline">View Cart (<span id="cartCount">0</span>)</button>
+          <button id="clearCartBtn" class="btn btn-secondary">Clear Cart</button>
+        </div>
+      </div>
+
+      {% if menu_items %}
+        <div class="menu-grid">
+          {% for item in menu_items %}
+            <div class="menu-item-card" data-item-id="{{ item.itm_id }}">
+              <div class="item-header">
+                <h3 class="item-name">{{ item.name }}</h3>
+                <div class="item-price">${{ "%.2f"|format(item.price_cents / 100) }}</div>
+              </div>
+              
+              {% if item.description %}
+                <p class="item-description">{{ item.description }}</p>
+              {% endif %}
+              
+              <div class="item-details">
+                <div class="item-meta">
+                  <span class="calories">{{ item.calories }} cal</span>
+                  {% if item.allergens %}
+                    <span class="allergens">⚠️ {{ item.allergens }}</span>
+                  {% endif %}
+                </div>
+              </div>
+              
+              <div class="item-actions">
+                <div class="quantity-controls">
+                  <button class="qty-btn" data-action="decrease">-</button>
+                  <input type="number" class="qty-input" value="1" min="1" max="10" />
+                  <button class="qty-btn" data-action="increase">+</button>
+                </div>
+                <button class="add-to-cart-btn" data-item-id="{{ item.itm_id }}">
+                  Add to Cart
+                </button>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="empty">
+          <div class="icon">🍽️</div>
+          <h3>No menu items available</h3>
+          <p>This restaurant doesn't have any items in stock at the moment.</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</main>
+
+<!-- Cart Modal -->
+<div id="cartModal" class="modal" style="display: none;">
+  <div class="modal-backdrop"></div>
+  <div class="modal-card">
+    <div class="card-header">
+      <h3>Your Cart</h3>
+      <button id="closeCartBtn" class="icon-btn">&times;</button>
+    </div>
+    <div class="card-body">
+      <div id="cartItems"></div>
+      <div id="cartSummary"></div>
+    </div>
+    <div class="card-footer">
+      <div class="cart-actions">
+        <button id="placeOrderBtn" class="btn btn-primary">Place Order</button>
+        <button id="cancelOrderBtn" class="btn btn-outline">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">© 2025 Weeklies</div>
+</footer>
+
+<style>
+  .restaurant-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16px;
+  }
+  
+  .restaurant-description {
+    color: var(--muted);
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+  
+  .restaurant-info {
+    margin-top: 16px;
+  }
+  
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+  }
+  
+  .info-item strong {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--text);
+  }
+  
+  .info-item p {
+    margin: 0;
+    color: var(--muted);
+  }
+  
+  .menu-section {
+    margin-top: 24px;
+  }
+  
+  .menu-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .menu-actions {
+    display: flex;
+    gap: 12px;
+  }
+  
+  .menu-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+  }
+  
+  .menu-item-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  .menu-item-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+  
+  .item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+  }
+  
+  .item-name {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+  
+  .item-price {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--primary);
+  }
+  
+  .item-description {
+    color: var(--muted);
+    font-size: 0.9rem;
+    line-height: 1.4;
+    margin-bottom: 12px;
+  }
+  
+  .item-details {
+    margin-bottom: 16px;
+  }
+  
+  .item-meta {
+    display: flex;
+    gap: 12px;
+    font-size: 0.85rem;
+  }
+  
+  .calories {
+    color: var(--muted);
+  }
+  
+  .allergens {
+    color: var(--warning);
+    font-weight: 500;
+  }
+  
+  .item-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+  
+  .quantity-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .qty-btn {
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--border);
+    background: var(--hint);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  
+  .qty-btn:hover {
+    background: var(--border);
+  }
+  
+  .qty-input {
+    width: 50px;
+    height: 32px;
+    text-align: center;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    border-radius: 6px;
+  }
+  
+  .add-to-cart-btn {
+    padding: 8px 16px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.2s ease;
+  }
+  
+  .add-to-cart-btn:hover {
+    background: var(--primary-600);
+  }
+  
+  .add-to-cart-btn:disabled {
+    background: var(--muted);
+    cursor: not-allowed;
+  }
+  
+  .modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.5);
+  }
+  
+  .modal[style*="flex"] {
+    display: flex !important;
+  }
+  
+  .modal-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+  }
+  
+  .modal-card {
+    position: relative;
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-md);
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow: hidden;
+  }
+  
+  .modal-card .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .cart-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+  }
+  
+  .cart-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  
+  .cart-item:last-child {
+    border-bottom: none;
+  }
+  
+  .cart-item-info h4 {
+    margin: 0 0 4px 0;
+    font-size: 1rem;
+  }
+  
+  .cart-item-info p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+  
+  .cart-item-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  
+  .cart-item-controls .qty-btn {
+    width: 28px;
+    height: 28px;
+    font-size: 14px;
+  }
+  
+  .cart-item-controls .cart-quantity {
+    min-width: 20px;
+    text-align: center;
+    font-weight: 600;
+  }
+  
+  .cart-item-price {
+    font-weight: 600;
+    color: var(--primary);
+  }
+  
+  .cart-summary {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+  
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  
+  .summary-total {
+    font-weight: 700;
+    font-size: 1.1rem;
+    border-top: 1px solid var(--border);
+    padding-top: 8px;
+    margin-top: 8px;
+  }
+  
+  @media (max-width: 768px) {
+    .menu-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .item-actions {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    
+    .quantity-controls {
+      justify-content: center;
+    }
+  }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Cart management
+  let cart = JSON.parse(localStorage.getItem('restaurant_cart') || '[]');
+  const restaurantId = {{ restaurant.rtr_id }};
+  
+  // Filter cart to only include items from this restaurant
+  cart = cart.filter(item => item.restaurant_id === restaurantId);
+  
+  // Menu items data
+  const menuItems = {{ menu_items|tojson }};
+  const menuItemsMap = {};
+  menuItems.forEach(item => {
+    menuItemsMap[item.itm_id] = item;
+  });
+  
+  // Update cart count display
+  function updateCartCount() {
+    const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+    document.getElementById('cartCount').textContent = count;
+  }
+  
+  // Save cart to localStorage
+  function saveCart() {
+    localStorage.setItem('restaurant_cart', JSON.stringify(cart));
+    updateCartCount();
+  }
+  
+  // Add item to cart
+  function addToCart(itemId, quantity) {
+    const existingItem = cart.find(item => item.item_id === itemId);
+    if (existingItem) {
+      existingItem.quantity += quantity;
+    } else {
+      const menuItem = menuItemsMap[itemId];
+      if (menuItem) {
+        cart.push({
+          item_id: itemId,
+          name: menuItem.name,
+          price: menuItem.price_cents / 100,
+          quantity: quantity,
+          restaurant_id: restaurantId,
+          restaurant_name: '{{ restaurant.name }}'
+        });
+      }
+    }
+    saveCart();
+  }
+  
+  // Remove item from cart
+  function removeFromCart(itemId) {
+    cart = cart.filter(item => item.item_id !== itemId);
+    saveCart();
+    // Re-render cart if modal is open
+    if (cartModal.style.display === 'flex') {
+      renderCart();
+    }
+  }
+  
+  // Update item quantity in cart
+  function updateCartQuantity(itemId, quantity) {
+    const item = cart.find(item => item.item_id === itemId);
+    if (item) {
+      if (quantity <= 0) {
+        removeFromCart(itemId);
+      } else {
+        item.quantity = quantity;
+        saveCart();
+      }
+      // Re-render cart if modal is open
+      if (cartModal.style.display === 'flex') {
+        renderCart();
+      }
+    }
+  }
+  
+  // Render cart modal
+  function renderCart() {
+    const cartItems = document.getElementById('cartItems');
+    const cartSummary = document.getElementById('cartSummary');
+    
+    if (cart.length === 0) {
+      cartItems.innerHTML = '<p class="muted">Your cart is empty</p>';
+      cartSummary.innerHTML = '';
+      return;
+    }
+    
+    // Render cart items
+    cartItems.innerHTML = cart.map(item => `
+      <div class="cart-item" data-item-id="${item.item_id}">
+        <div class="cart-item-info">
+          <h4>${item.name}</h4>
+          <p>$${item.price.toFixed(2)} each</p>
+        </div>
+        <div class="cart-item-controls">
+          <button class="qty-btn cart-decrease" data-item-id="${item.item_id}">-</button>
+          <span class="cart-quantity">${item.quantity}</span>
+          <button class="qty-btn cart-increase" data-item-id="${item.item_id}">+</button>
+          <span class="cart-item-price">$${(item.price * item.quantity).toFixed(2)}</span>
+          <button class="btn btn-secondary cart-remove" data-item-id="${item.item_id}">Remove</button>
+        </div>
+      </div>
+    `).join('');
+    
+    // Use event delegation for cart controls
+    cartItems.addEventListener('click', function(e) {
+      const target = e.target;
+      
+      if (target.classList.contains('cart-decrease')) {
+        const itemId = parseInt(target.dataset.itemId);
+        const item = cart.find(item => item.item_id === itemId);
+        if (item) {
+          updateCartQuantity(itemId, item.quantity - 1);
+        }
+      } else if (target.classList.contains('cart-increase')) {
+        const itemId = parseInt(target.dataset.itemId);
+        const item = cart.find(item => item.item_id === itemId);
+        if (item) {
+          updateCartQuantity(itemId, item.quantity + 1);
+        }
+      } else if (target.classList.contains('cart-remove')) {
+        const itemId = parseInt(target.dataset.itemId);
+        removeFromCart(itemId);
+      }
+    });
+    
+    // Calculate totals
+    const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const tax = subtotal * 0.0725;
+    const deliveryFee = 3.99;
+    const serviceFee = 1.49;
+    const total = subtotal + tax + deliveryFee + serviceFee;
+    
+    // Render summary
+    cartSummary.innerHTML = `
+      <div class="cart-summary">
+        <div class="summary-row">
+          <span>Subtotal:</span>
+          <span>$${subtotal.toFixed(2)}</span>
+        </div>
+        <div class="summary-row">
+          <span>Tax (7.25%):</span>
+          <span>$${tax.toFixed(2)}</span>
+        </div>
+        <div class="summary-row">
+          <span>Delivery Fee:</span>
+          <span>$${deliveryFee.toFixed(2)}</span>
+        </div>
+        <div class="summary-row">
+          <span>Service Fee:</span>
+          <span>$${serviceFee.toFixed(2)}</span>
+        </div>
+        <div class="summary-row summary-total">
+          <span>Total:</span>
+          <span>$${total.toFixed(2)}</span>
+        </div>
+      </div>
+    `;
+  }
+  
+  // Event listeners
+  document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const itemId = parseInt(this.dataset.itemId);
+      const card = this.closest('.menu-item-card');
+      const quantity = parseInt(card.querySelector('.qty-input').value);
+      
+      addToCart(itemId, quantity);
+      
+      // Show feedback
+      this.textContent = 'Added!';
+      this.disabled = true;
+      setTimeout(() => {
+        this.textContent = 'Add to Cart';
+        this.disabled = false;
+      }, 1000);
+    });
+  });
+  
+  // Quantity controls
+  document.querySelectorAll('.qty-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const action = this.dataset.action;
+      const input = this.parentElement.querySelector('.qty-input');
+      let value = parseInt(input.value);
+      
+      if (action === 'increase') {
+        value = Math.min(value + 1, 10);
+      } else if (action === 'decrease') {
+        value = Math.max(value - 1, 1);
+      }
+      
+      input.value = value;
+    });
+  });
+  
+  // Cart modal elements
+  let cartModal, viewCartBtn, closeCartBtn, clearCartBtn, placeOrderBtn, cancelOrderBtn;
+  
+  // Function to close modal
+  function closeModal() {
+    if (cartModal) {
+      cartModal.style.display = 'none';
+    }
+  }
+  
+  // Function to show modal
+  function showModal() {
+    if (cartModal) {
+      renderCart();
+      cartModal.style.display = 'flex';
+    } else {
+      console.error('Cart modal not found!');
+    }
+  }
+  
+  // Initialize cart modal elements and event listeners
+  function initializeCartModal() {
+    cartModal = document.getElementById('cartModal');
+    viewCartBtn = document.getElementById('viewCartBtn');
+    closeCartBtn = document.getElementById('closeCartBtn');
+    clearCartBtn = document.getElementById('clearCartBtn');
+    placeOrderBtn = document.getElementById('placeOrderBtn');
+    cancelOrderBtn = document.getElementById('cancelOrderBtn');
+    
+    // Debug: Check if elements exist
+    console.log('Cart modal elements:', {
+      cartModal: !!cartModal,
+      viewCartBtn: !!viewCartBtn,
+      closeCartBtn: !!closeCartBtn,
+      clearCartBtn: !!clearCartBtn,
+      placeOrderBtn: !!placeOrderBtn,
+      cancelOrderBtn: !!cancelOrderBtn
+    });
+    
+    // Add event listeners
+    if (viewCartBtn) {
+      viewCartBtn.addEventListener('click', showModal);
+    }
+    
+    if (closeCartBtn) {
+      closeCartBtn.addEventListener('click', closeModal);
+    }
+    
+    if (cancelOrderBtn) {
+      cancelOrderBtn.addEventListener('click', closeModal);
+    }
+    
+    if (clearCartBtn) {
+      clearCartBtn.addEventListener('click', function() {
+        if (confirm('Clear your entire cart?')) {
+          cart = [];
+          saveCart();
+          renderCart();
+        }
+      });
+    }
+    
+    if (placeOrderBtn) {
+      placeOrderBtn.addEventListener('click', function() {
+        if (cart.length === 0) {
+          alert('Your cart is empty');
+          return;
+        }
+        
+        // Prepare order data
+        const orderData = {
+          restaurant_id: restaurantId,
+          items: cart.map(item => ({
+            itm_id: item.item_id,
+            qty: item.quantity,
+            notes: ''
+          })),
+          delivery_type: 'delivery',
+          tip: 0,
+          eta_minutes: 40,
+          date: new Date().toISOString().slice(0, 10),
+          meal: 3
+        };
+        
+        // Place order
+        fetch('{{ url_for("order") }}', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(orderData)
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.ok) {
+            // Clear cart and redirect
+            cart = [];
+            saveCart();
+            alert('Order placed successfully!');
+            window.location.href = '{{ url_for("profile") }}';
+          } else {
+            alert('Failed to place order: ' + (data.error || 'Unknown error'));
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('Failed to place order');
+        });
+      });
+    }
+    
+    // Close modal when clicking backdrop
+    if (cartModal) {
+      cartModal.addEventListener('click', function(e) {
+        if (e.target === cartModal || e.target.classList.contains('modal-backdrop')) {
+          closeModal();
+        }
+      });
+    }
+  }
+  
+  // Initialize everything with a small delay to ensure DOM is ready
+  setTimeout(() => {
+    initializeCartModal();
+    updateCartCount();
+  }, 100);
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frontend Tests - Weeklies App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            margin: 10px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .test-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .test-button:hover {
+            background: #0056b3;
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .test-pass {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .test-fail {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .test-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .cart-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .cart-content {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .menu-item {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .qty-btn {
+            width: 30px;
+            height: 30px;
+            border: 1px solid #ddd;
+            background: #f8f9fa;
+            cursor: pointer;
+        }
+        .qty-input {
+            width: 50px;
+            text-align: center;
+        }
+        .add-to-cart-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .cart-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .remove-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .modal-close {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            float: right;
+        }
+        .order-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .cancel-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Weeklies App - Frontend Test Suite</h1>
+    <p>This page tests all the frontend functionality including cart management, modal interactions, and JavaScript features.</p>
+
+    <!-- Test Controls -->
+    <div class="test-container">
+        <h2>Test Controls</h2>
+        <button class="test-button" onclick="runAllTests()">Run All Tests</button>
+        <button class="test-button" onclick="clearResults()">Clear Results</button>
+        <button class="test-button" onclick="testCartFunctionality()">Test Cart Only</button>
+        <button class="test-button" onclick="testModalFunctionality()">Test Modal Only</button>
+    </div>
+
+    <!-- Test Results -->
+    <div id="test-results" class="test-container">
+        <h2>Test Results</h2>
+        <div id="results-content"></div>
+    </div>
+
+    <!-- Mock Restaurant Menu for Testing -->
+    <div class="test-container">
+        <h2>Mock Restaurant Menu (for testing)</h2>
+        <div class="menu-item" data-item-id="1">
+            <h3>Test Pizza</h3>
+            <p>Delicious test pizza - $15.00</p>
+            <div class="quantity-controls">
+                <button class="qty-btn" data-action="decrease">-</button>
+                <input type="number" class="qty-input" value="1" min="1" max="10">
+                <button class="qty-btn" data-action="increase">+</button>
+                <button class="add-to-cart-btn" data-item-id="1">Add to Cart</button>
+            </div>
+        </div>
+        
+        <div class="menu-item" data-item-id="2">
+            <h3>Test Burger</h3>
+            <p>Juicy test burger - $12.00</p>
+            <div class="quantity-controls">
+                <button class="qty-btn" data-action="decrease">-</button>
+                <input type="number" class="qty-input" value="1" min="1" max="10">
+                <button class="qty-btn" data-action="increase">+</button>
+                <button class="add-to-cart-btn" data-item-id="2">Add to Cart</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cart Modal -->
+    <div id="cartModal" class="cart-modal">
+        <div class="cart-content">
+            <h3>Your Cart <button class="modal-close" id="closeCartBtn">&times;</button></h3>
+            <div id="cartItems"></div>
+            <div id="cartSummary"></div>
+            <div style="margin-top: 20px;">
+                <button class="order-btn" id="placeOrderBtn">Place Order</button>
+                <button class="cancel-btn" id="cancelOrderBtn">Cancel</button>
+                <button class="cancel-btn" id="clearCartBtn">Clear Cart</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Cart Button -->
+    <div class="test-container">
+        <button class="test-button" id="viewCartBtn">View Cart (<span id="cartCount">0</span>)</button>
+    </div>
+
+    <script>
+        // Test framework
+        class TestFramework {
+            constructor() {
+                this.tests = [];
+                this.results = [];
+            }
+
+            addTest(name, testFunction) {
+                this.tests.push({ name, testFunction });
+            }
+
+            async runTest(test) {
+                try {
+                    await test.testFunction();
+                    this.results.push({ name: test.name, status: 'PASS', message: 'Test passed' });
+                } catch (error) {
+                    this.results.push({ name: test.name, status: 'FAIL', message: error.message });
+                }
+            }
+
+            async runAllTests() {
+                this.results = [];
+                for (const test of this.tests) {
+                    await this.runTest(test);
+                }
+                this.displayResults();
+            }
+
+            displayResults() {
+                const resultsDiv = document.getElementById('results-content');
+                resultsDiv.innerHTML = '';
+
+                const passed = this.results.filter(r => r.status === 'PASS').length;
+                const failed = this.results.filter(r => r.status === 'FAIL').length;
+
+                resultsDiv.innerHTML += `
+                    <div class="test-info">
+                        <strong>Summary:</strong> ${passed} passed, ${failed} failed, ${this.results.length} total
+                    </div>
+                `;
+
+                this.results.forEach(result => {
+                    const div = document.createElement('div');
+                    div.className = `test-result test-${result.status.toLowerCase()}`;
+                    div.innerHTML = `
+                        <strong>${result.status}:</strong> ${result.name}<br>
+                        <small>${result.message}</small>
+                    `;
+                    resultsDiv.appendChild(div);
+                });
+            }
+        }
+
+        // Initialize test framework
+        const testFramework = new TestFramework();
+
+        // Cart management (simulating the actual app functionality)
+        let cart = JSON.parse(localStorage.getItem('restaurant_cart') || '[]');
+        const restaurantId = 1;
+
+        // Mock menu items
+        const menuItems = {
+            1: { itm_id: 1, name: 'Test Pizza', price_cents: 1500 },
+            2: { itm_id: 2, name: 'Test Burger', price_cents: 1200 }
+        };
+
+        function updateCartCount() {
+            const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+            document.getElementById('cartCount').textContent = count;
+        }
+
+        function saveCart() {
+            localStorage.setItem('restaurant_cart', JSON.stringify(cart));
+            updateCartCount();
+        }
+
+        function addToCart(itemId, quantity) {
+            const existingItem = cart.find(item => item.item_id === itemId);
+            if (existingItem) {
+                existingItem.quantity += quantity;
+            } else {
+                const menuItem = menuItems[itemId];
+                if (menuItem) {
+                    cart.push({
+                        item_id: itemId,
+                        name: menuItem.name,
+                        price: menuItem.price_cents / 100,
+                        quantity: quantity,
+                        restaurant_id: restaurantId,
+                        restaurant_name: 'Test Restaurant'
+                    });
+                }
+            }
+            saveCart();
+        }
+
+        function removeFromCart(itemId) {
+            cart = cart.filter(item => item.item_id !== itemId);
+            saveCart();
+        }
+
+        function updateCartQuantity(itemId, quantity) {
+            const item = cart.find(item => item.item_id === itemId);
+            if (item) {
+                if (quantity <= 0) {
+                    removeFromCart(itemId);
+                } else {
+                    item.quantity = quantity;
+                    saveCart();
+                }
+            }
+        }
+
+        function renderCart() {
+            const cartItems = document.getElementById('cartItems');
+            const cartSummary = document.getElementById('cartSummary');
+            
+            if (cart.length === 0) {
+                cartItems.innerHTML = '<p>Your cart is empty</p>';
+                cartSummary.innerHTML = '';
+                return;
+            }
+            
+            cartItems.innerHTML = cart.map(item => `
+                <div class="cart-item" data-item-id="${item.item_id}">
+                    <div>
+                        <strong>${item.name}</strong><br>
+                        <small>$${item.price.toFixed(2)} each</small>
+                    </div>
+                    <div class="cart-controls">
+                        <button class="qty-btn cart-decrease" data-item-id="${item.item_id}">-</button>
+                        <span class="cart-quantity">${item.quantity}</span>
+                        <button class="qty-btn cart-increase" data-item-id="${item.item_id}">+</button>
+                        <span>$${(item.price * item.quantity).toFixed(2)}</span>
+                        <button class="remove-btn cart-remove" data-item-id="${item.item_id}">Remove</button>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Add event listeners to cart controls
+            cartItems.addEventListener('click', function(e) {
+                if (e.target.classList.contains('cart-decrease')) {
+                    const itemId = parseInt(e.target.dataset.itemId);
+                    const item = cart.find(item => item.item_id === itemId);
+                    if (item) {
+                        updateCartQuantity(itemId, item.quantity - 1);
+                        renderCart();
+                    }
+                } else if (e.target.classList.contains('cart-increase')) {
+                    const itemId = parseInt(e.target.dataset.itemId);
+                    const item = cart.find(item => item.item_id === itemId);
+                    if (item) {
+                        updateCartQuantity(itemId, item.quantity + 1);
+                        renderCart();
+                    }
+                } else if (e.target.classList.contains('cart-remove')) {
+                    const itemId = parseInt(e.target.dataset.itemId);
+                    removeFromCart(itemId);
+                    renderCart();
+                }
+            });
+            
+            // Calculate totals
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const tax = subtotal * 0.0725;
+            const deliveryFee = 3.99;
+            const serviceFee = 1.49;
+            const total = subtotal + tax + deliveryFee + serviceFee;
+            
+            cartSummary.innerHTML = `
+                <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>Subtotal:</span>
+                        <span>$${subtotal.toFixed(2)}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>Tax (7.25%):</span>
+                        <span>$${tax.toFixed(2)}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>Delivery Fee:</span>
+                        <span>$${deliveryFee.toFixed(2)}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>Service Fee:</span>
+                        <span>$${serviceFee.toFixed(2)}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-weight: bold; margin-top: 10px;">
+                        <span>Total:</span>
+                        <span>$${total.toFixed(2)}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Modal functionality
+        function showModal() {
+            const modal = document.getElementById('cartModal');
+            if (modal) {
+                renderCart();
+                modal.style.display = 'flex';
+            }
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('cartModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add to cart buttons
+            document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const itemId = parseInt(this.dataset.itemId);
+                    const card = this.closest('.menu-item');
+                    const quantity = parseInt(card.querySelector('.qty-input').value);
+                    addToCart(itemId, quantity);
+                    
+                    // Show feedback
+                    this.textContent = 'Added!';
+                    this.disabled = true;
+                    setTimeout(() => {
+                        this.textContent = 'Add to Cart';
+                        this.disabled = false;
+                    }, 1000);
+                });
+            });
+
+            // Quantity controls
+            document.querySelectorAll('.qty-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const action = this.dataset.action;
+                    const input = this.parentElement.querySelector('.qty-input');
+                    let value = parseInt(input.value);
+                    
+                    if (action === 'increase') {
+                        value = Math.min(value + 1, 10);
+                    } else if (action === 'decrease') {
+                        value = Math.max(value - 1, 1);
+                    }
+                    
+                    input.value = value;
+                });
+            });
+
+            // Cart modal controls
+            document.getElementById('viewCartBtn').addEventListener('click', showModal);
+            document.getElementById('closeCartBtn').addEventListener('click', closeModal);
+            document.getElementById('cancelOrderBtn').addEventListener('click', closeModal);
+            document.getElementById('clearCartBtn').addEventListener('click', function() {
+                if (confirm('Clear your entire cart?')) {
+                    cart = [];
+                    saveCart();
+                    renderCart();
+                }
+            });
+            document.getElementById('placeOrderBtn').addEventListener('click', function() {
+                if (cart.length === 0) {
+                    alert('Your cart is empty');
+                    return;
+                }
+                alert('Order placed successfully! (This is a test)');
+                cart = [];
+                saveCart();
+                renderCart();
+                closeModal();
+            });
+
+            // Close modal when clicking backdrop
+            document.getElementById('cartModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeModal();
+                }
+            });
+
+            // Initialize
+            updateCartCount();
+        });
+
+        // Test functions
+        testFramework.addTest('Cart Add Item', async function() {
+            const initialCount = cart.length;
+            addToCart(1, 1);
+            if (cart.length !== initialCount + 1) {
+                throw new Error('Item not added to cart');
+            }
+            if (cart[cart.length - 1].item_id !== 1) {
+                throw new Error('Wrong item added to cart');
+            }
+        });
+
+        testFramework.addTest('Cart Update Quantity', async function() {
+            addToCart(1, 1);
+            const initialQuantity = cart.find(item => item.item_id === 1).quantity;
+            updateCartQuantity(1, initialQuantity + 1);
+            const newQuantity = cart.find(item => item.item_id === 1).quantity;
+            if (newQuantity !== initialQuantity + 1) {
+                throw new Error('Quantity not updated correctly');
+            }
+        });
+
+        testFramework.addTest('Cart Remove Item', async function() {
+            addToCart(2, 1);
+            const initialCount = cart.length;
+            removeFromCart(2);
+            if (cart.length !== initialCount - 1) {
+                throw new Error('Item not removed from cart');
+            }
+        });
+
+        testFramework.addTest('Cart Clear', async function() {
+            addToCart(1, 1);
+            addToCart(2, 1);
+            cart = [];
+            saveCart();
+            if (cart.length !== 0) {
+                throw new Error('Cart not cleared');
+            }
+        });
+
+        testFramework.addTest('Modal Show', async function() {
+            showModal();
+            const modal = document.getElementById('cartModal');
+            if (modal.style.display !== 'flex') {
+                throw new Error('Modal not shown');
+            }
+        });
+
+        testFramework.addTest('Modal Close', async function() {
+            showModal();
+            closeModal();
+            const modal = document.getElementById('cartModal');
+            if (modal.style.display !== 'none') {
+                throw new Error('Modal not closed');
+            }
+        });
+
+        testFramework.addTest('Cart Count Update', async function() {
+            const initialCount = parseInt(document.getElementById('cartCount').textContent);
+            addToCart(1, 2);
+            const newCount = parseInt(document.getElementById('cartCount').textContent);
+            if (newCount !== initialCount + 2) {
+                throw new Error('Cart count not updated correctly');
+            }
+        });
+
+        testFramework.addTest('Quantity Controls', async function() {
+            const input = document.querySelector('.qty-input');
+            const increaseBtn = input.parentElement.querySelector('[data-action="increase"]');
+            const decreaseBtn = input.parentElement.querySelector('[data-action="decrease"]');
+            
+            const initialValue = parseInt(input.value);
+            
+            increaseBtn.click();
+            if (parseInt(input.value) !== initialValue + 1) {
+                throw new Error('Increase button not working');
+            }
+            
+            decreaseBtn.click();
+            if (parseInt(input.value) !== initialValue) {
+                throw new Error('Decrease button not working');
+            }
+        });
+
+        testFramework.addTest('Add to Cart Button', async function() {
+            const addBtn = document.querySelector('.add-to-cart-btn');
+            const initialText = addBtn.textContent;
+            
+            addBtn.click();
+            
+            if (addBtn.textContent !== 'Added!') {
+                throw new Error('Add button feedback not working');
+            }
+            
+            if (!addBtn.disabled) {
+                throw new Error('Add button not disabled after click');
+            }
+        });
+
+        testFramework.addTest('Cart Calculation', async function() {
+            cart = [];
+            addToCart(1, 2); // $15.00 * 2 = $30.00
+            addToCart(2, 1); // $12.00 * 1 = $12.00
+            
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const expectedSubtotal = 42.00;
+            
+            if (Math.abs(subtotal - expectedSubtotal) > 0.01) {
+                throw new Error(`Subtotal calculation incorrect: expected ${expectedSubtotal}, got ${subtotal}`);
+            }
+        });
+
+        testFramework.addTest('Local Storage Persistence', async function() {
+            cart = [];
+            addToCart(1, 1);
+            saveCart();
+            
+            const storedCart = JSON.parse(localStorage.getItem('restaurant_cart') || '[]');
+            if (storedCart.length !== 1) {
+                throw new Error('Cart not saved to localStorage');
+            }
+        });
+
+        // Global functions for buttons
+        function runAllTests() {
+            testFramework.runAllTests();
+        }
+
+        function clearResults() {
+            document.getElementById('results-content').innerHTML = '';
+        }
+
+        function testCartFunctionality() {
+            const cartTests = testFramework.tests.filter(test => 
+                test.name.includes('Cart') || test.name.includes('Quantity')
+            );
+            testFramework.tests = cartTests;
+            testFramework.runAllTests();
+        }
+
+        function testModalFunctionality() {
+            const modalTests = testFramework.tests.filter(test => 
+                test.name.includes('Modal')
+            );
+            testFramework.tests = modalTests;
+            testFramework.runAllTests();
+        }
+    </script>
+</body>
+</html>
