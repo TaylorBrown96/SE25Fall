@@ -455,7 +455,7 @@
 document.addEventListener('DOMContentLoaded', function() {
   // Cart management
   let cart = JSON.parse(localStorage.getItem('restaurant_cart') || '[]');
-  const restaurantId = {{ restaurant.rtr_id }};
+  const restaurantId = {{ restaurant.rtr_id|tojson }};
   
   // Filter cart to only include items from this restaurant
   cart = cart.filter(item => item.restaurant_id === restaurantId);
@@ -493,7 +493,7 @@ document.addEventListener('DOMContentLoaded', function() {
           price: menuItem.price_cents / 100,
           quantity: quantity,
           restaurant_id: restaurantId,
-          restaurant_name: '{{ restaurant.name }}'
+          restaurant_name: {{ restaurant.name|tojson }}
         });
       }
     }
@@ -732,7 +732,7 @@ document.addEventListener('DOMContentLoaded', function() {
         };
         
         // Place order
-        fetch('{{ url_for("order") }}', {
+        fetch({{ url_for("order")|tojson }}, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -746,7 +746,7 @@ document.addEventListener('DOMContentLoaded', function() {
             cart = [];
             saveCart();
             alert('Order placed successfully!');
-            window.location.href = '{{ url_for("profile") }}';
+            window.location.href = {{ url_for("profile")|tojson }};
           } else {
             alert('Failed to place order: ' + (data.error || 'Unknown error'));
           }
