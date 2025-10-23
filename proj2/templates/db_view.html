@@ -3,17 +3,18 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Database Viewer · My Web Page</title>
+  <title>Database · My Web Page</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
   <script src="{{ url_for('static', filename='script.js') }}" defer></script>
 </head>
 <body>
 <header class="site-header">
   <div class="container">
-    <a class="brand" href="{{ url_for('index') }}"><span class="logo"></span> My Web Page</a>
+    <a class="brand" href="{{ url_for('index') }}"><span class="logo"></span> Weeklies</a>
     <nav>
       <a href="{{ url_for('index') }}">Home</a>
       <a href="{{ url_for('profile') }}">Profile</a>
+      <a href="{{ url_for('orders') }}">Order</a>
       <a href="{{ url_for('db_view') }}">DB</a>
       <a href="{{ url_for('logout') }}" data-confirm="Log out now?">Logout</a>
     </nav>
@@ -81,7 +82,8 @@
 </main>
 
 <footer class="footer">
-  <div class="container">© {{ 2025 }} My Web Page</div>
+  <div class="container">© {{ 2025 }} Weeklies</div>
 </footer>
+
 </body>
 </html>
