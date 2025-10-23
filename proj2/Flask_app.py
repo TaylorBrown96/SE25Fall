@@ -731,34 +731,73 @@ def order():
 
     return redirect(url_for("profile") + (f"?ordered={new_ord_id}" if new_ord_id else ""))
 
-# Orders route
-@app.route('/orders')
-def orders():
+# Restaurant search route
+@app.route('/restaurants')
+def restaurants():
     if session.get('Username') is None:
         return redirect(url_for('login'))
 
+    # Get search parameters
+    search_query = request.args.get('q', '').strip()
+    cuisine_filter = request.args.get('cuisine', '').strip()
+    location_filter = request.args.get('location', '').strip()
+    sort_by = request.args.get('sort', 'name')  # name, rating, distance
+
     conn = create_connection(db_file)
     try:
-        # Pull address fields too
-        restaurants = fetch_all(conn, 'SELECT rtr_id, name, address, city, state, zip FROM "Restaurant"')
-        menu_items = fetch_all(conn, '''
-            SELECT itm_id, rtr_id, name, price, calories, allergens, description
-            FROM "MenuItem"
-            WHERE instock IS NULL OR instock = 1
-        ''')
+        # Build dynamic query based on filters
+        where_conditions = []
+        params = []
+        
+        if search_query:
+            where_conditions.append("(r.name LIKE ? OR r.description LIKE ?)")
+            search_term = f"%{search_query}%"
+            params.extend([search_term, search_term])
+        
+        if cuisine_filter:
+            where_conditions.append("r.description LIKE ?")
+            params.append(f"%{cuisine_filter}%")
+        
+        if location_filter:
+            where_conditions.append("(r.city LIKE ? OR r.state LIKE ? OR r.address LIKE ?)")
+            location_term = f"%{location_filter}%"
+            params.extend([location_term, location_term, location_term])
+
+        where_clause = "WHERE " + " AND ".join(where_conditions) if where_conditions else ""
+        
+        # Add sorting
+        order_clause = "ORDER BY "
+        if sort_by == 'rating':
+            order_clause += "r.rating DESC, r.name ASC"
+        elif sort_by == 'distance':
+            order_clause += "r.name ASC"  # Placeholder - would need location data
+        else:
+            order_clause += "r.name ASC"
+
+        # Get restaurants with menu item counts
+        sql = f"""
+            SELECT r.rtr_id, r.name, r.description, r.address, r.city, r.state, r.zip, 
+                   r.phone, r.hours, r.status,
+                   COUNT(m.itm_id) as menu_count,
+                   AVG(m.price) as avg_price
+            FROM "Restaurant" r
+            LEFT JOIN "MenuItem" m ON r.rtr_id = m.rtr_id AND (m.instock IS NULL OR m.instock = 1)
+            {where_clause}
+            GROUP BY r.rtr_id, r.name, r.description, r.address, r.city, r.state, r.zip, r.phone, r.hours, r.status
+            {order_clause}
+        """
+        
+        restaurants = fetch_all(conn, sql, params)
     finally:
         close_connection(conn)
 
     def _addr(a, c, s, z) -> str:
-        """
-        Safely join address parts that might be None/ints.
-        """
+        """Safely join address parts that might be None/ints."""
         parts_raw = [a, c, s, z]
         parts = []
         for p in parts_raw:
             if p is None:
                 continue
-            # Coerce to string and strip
             sp = str(p).strip()
             if sp:
                 parts.append(sp)
@@ -767,24 +806,101 @@ def orders():
     rest_list = [{
         "rtr_id": r[0],
         "name": r[1],
-        "address": r[2] or "",
-        "city": r[3] or "",
-        "state": r[4] or "",
-        "zip": r[5] if r[5] is not None else "",
-        "address_full": _addr(r[2], r[3], r[4], r[5]),
+        "description": r[2] or "",
+        "address": r[3] or "",
+        "city": r[4] or "",
+        "state": r[5] or "",
+        "zip": r[6] if r[6] is not None else "",
+        "phone": r[7] or "",
+        "hours": r[8] or "",
+        "status": r[9] or "Open",
+        "menu_count": r[10] or 0,
+        "avg_price": _cents_to_dollars(r[11]) if r[11] else 0,
+        "address_full": _addr(r[3], r[4], r[5], r[6]),
     } for r in restaurants]
 
+    return render_template("restaurants.html", 
+                         restaurants=rest_list,
+                         search_query=search_query,
+                         cuisine_filter=cuisine_filter,
+                         location_filter=location_filter,
+                         sort_by=sort_by)
+
+# Restaurant menu route
+@app.route('/restaurant/<int:restaurant_id>')
+def restaurant_menu(restaurant_id):
+    if session.get('Username') is None:
+        return redirect(url_for('login'))
+
+    conn = create_connection(db_file)
+    try:
+        # Get restaurant details
+        restaurant = fetch_one(conn, '''
+            SELECT rtr_id, name, description, address, city, state, zip, phone, hours, status
+            FROM "Restaurant" WHERE rtr_id = ?
+        ''', (restaurant_id,))
+        
+        if not restaurant:
+            return redirect(url_for('restaurants'))
+
+        # Get menu items for this restaurant
+        menu_items = fetch_all(conn, '''
+            SELECT itm_id, name, description, price, calories, allergens, instock
+            FROM "MenuItem"
+            WHERE rtr_id = ? AND (instock IS NULL OR instock = 1)
+            ORDER BY name
+        ''', (restaurant_id,))
+    finally:
+        close_connection(conn)
+
+    def _addr(a, c, s, z) -> str:
+        """Safely join address parts that might be None/ints."""
+        parts_raw = [a, c, s, z]
+        parts = []
+        for p in parts_raw:
+            if p is None:
+                continue
+            sp = str(p).strip()
+            if sp:
+                parts.append(sp)
+        return ", ".join(parts)
+
+    restaurant_data = {
+        "rtr_id": restaurant[0],
+        "name": restaurant[1],
+        "description": restaurant[2] or "",
+        "address": restaurant[3] or "",
+        "city": restaurant[4] or "",
+        "state": restaurant[5] or "",
+        "zip": restaurant[6] if restaurant[6] is not None else "",
+        "phone": restaurant[7] or "",
+        "hours": restaurant[8] or "",
+        "status": restaurant[9] or "Open",
+        "address_full": _addr(restaurant[3], restaurant[4], restaurant[5], restaurant[6]),
+    }
+
     item_list = [{
-        "itm_id":      m[0],
-        "rtr_id":      m[1],
-        "name":        m[2],
+        "itm_id": m[0],
+        "name": m[1],
+        "description": m[2] or "",
         "price_cents": m[3] or 0,
-        "calories":    m[4] or 0,
-        "allergens":   m[5] or "",
-        "description": m[6] or "",
+        "calories": m[4] or 0,
+        "allergens": m[5] or "",
+        "instock": m[6] is None or m[6] == 1,
     } for m in menu_items]
 
-    return render_template("orders.html", restaurants=rest_list, items=item_list)
+    return render_template("restaurant_menu.html", 
+                         restaurant=restaurant_data, 
+                         menu_items=item_list)
+
+# Orders route (updated to redirect to restaurant search)
+@app.route('/orders')
+def orders():
+    if session.get('Username') is None:
+        return redirect(url_for('login'))
+    
+    # Redirect to restaurant search for better UX
+    return redirect(url_for('restaurants'))
 
 # Order receipt PDF route
 @app.route('/orders/<int:ord_id>/receipt.pdf')
