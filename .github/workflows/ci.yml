@@ -16,6 +16,7 @@ jobs:
       - name: Install deps
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
-      - name: Run tests
+          pip install -r proj2/requirements.txt
+      - name: Run tests (proj2)
+        working-directory: ./proj2
         run: pytest -q

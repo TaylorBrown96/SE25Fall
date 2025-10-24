@@ -12,7 +12,7 @@
 ```powershell
 # 1) Clone
 git clone https://github.com/<TaylorBrown96>/<SE25Fall>.git
-cd <SE25Fall>
+cd <SE25Fall>/proj2
 
 # 2) Create & activate a venv
 py -3 -m venv .venv
@@ -31,7 +31,7 @@ pip install -r requirements.txt
 ```bash
 # 1) Clone the repository
 git clone https://github.com/<TaylorBrown96>/<SE25Fall>.git
-cd <SE25Fall>
+cd <SE25Fall>/proj2
 
 # 2) Create & activate a venv
 python3 -m venv .venv
@@ -46,9 +46,20 @@ pip install -r requirements.txt
 
 ### Running the Application
 Once dependencies are installed and the virtual environment is activated, you can run the Flask server:
-```bash
-Set the application entry point
+
+### Windows (PowerShell)
+```powershell
+# Set the application entry point
 $env:FLASK_APP = "Flask_app.py"
+
+# Start the development server
+python -m flask run
+```
+
+### MacOS / Linux (Bash/Zsh)
+```bash
+# Set the application entry point
+export FLASK_APP="Flask_app.py"
 
 # Start the development server
 python -m flask run
@@ -71,13 +82,17 @@ To build the documentation locally:
 ### Windows (PowerShell)
 ```powershell
 # Temporarily add current directory to Python path
-$env:PYTHONPATH="." ; pdoc --docformat google -o site Flask_app sqlQueries
+$env:PYTHONPATH="." ; pdoc --docformat google --no-show-source -o site.
+# View the documentation in your default browser
+explorer .\site\index.html
 ```
 
 ### MacOS / Linux (Bash/Zsh)
 ```bash
 # Temporarily add current directory to Python path
-PYTHONPATH=. pdoc --docformat google -o site Flask_app sqlQueries
+PYTHONPATH=. pdoc --docformat google --no-show-source -o site .
+# View the documentation in your default browser
+open ./site/index.html
 ```
 
 The generated HTML files will be available in the ./site directory.
