@@ -76,11 +76,21 @@ pytest -q
 
 ## 📚Documentation
 
-### _Documentation is generated using pdoc and includes modules Flask_app and sqlQueries._
-To build the documentation locally:
+### _Documentation is generated using pdoc._
+Documentation is automatically generated using pdoc and deployed to GitHub Pages whenever new changes are merged into the `main` branch.
 
+### 🧩 Automated Docs
+* CI/CD workflow (`docs.yml`) builds and publishes docs from `proj2/` to the `gh-pages` branch.
+
+* Live documentation becomes available at the GitHub Pages link after each successful merge.
+
+* Source code is hidden; only public functions, classes, and docstrings are shown.
+
+### 🖥️ Build Docs Locally
+You can also generate and preview the documentation manually:
 ### Windows (PowerShell)
 ```powershell
+cd proj2
 # Temporarily add current directory to Python path
 $env:PYTHONPATH="." ; pdoc --docformat google --no-show-source -o site.
 # View the documentation in your default browser
@@ -89,10 +99,11 @@ explorer .\site\index.html
 
 ### MacOS / Linux (Bash/Zsh)
 ```bash
+cd proj2
 # Temporarily add current directory to Python path
 PYTHONPATH=. pdoc --docformat google --no-show-source -o site .
 # View the documentation in your default browser
 open ./site/index.html
 ```
 
-The generated HTML files will be available in the ./site directory.
+The generated HTML files will be available in the `proj2/site` directory.
