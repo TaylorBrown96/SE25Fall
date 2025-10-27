@@ -6,40 +6,6 @@
   <title>Register · Weeklies</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
   <script src="{{ url_for('static', filename='script.js') }}" defer></script>
-  <style>
-    /* Preference bubbles */
-    .pref-toolbar { display:flex; gap:12px; align-items:center; margin-bottom:12px; flex-wrap:wrap; }
-    .pref-toolbar .input { max-width: 380px; }
-    .bubbles { display:flex; flex-wrap:wrap; gap:12px; }
-    .bubble {
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      border-radius:999px;
-      border:2px solid var(--border);
-      background: rgba(0,0,0,0.05);
-      color: var(--text);
-      padding: 10px 14px;
-      cursor:pointer;
-      user-select:none;
-      transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease;
-      opacity: 0.5;
-    }
-    .bubble:hover { transform: translateY(-1px); opacity: 0.7; }
-    .bubble.selected {
-      background: rgba(0,0,0,0.05);
-      border-color: currentColor;
-      box-shadow: 0 0 6px currentColor;
-      opacity: 1;
-    }
-    .section-title { margin: 0 0 6px; font-size: 18px; }
-    .muted { color: var(--muted); font-size: 14px; margin: 0 0 12px; }
-    .allergen-grid { display:grid; gap:10px; grid-template-columns: repeat(2, minmax(0,1fr)); }
-    @media (min-width: 720px) { .allergen-grid { grid-template-columns: repeat(3, minmax(0,1fr)); } }
-    .allergen { display:flex; gap:10px; align-items:center; padding:10px 12px; border:1px solid var(--border); border-radius:12px; background: var(--surface); }
-    .step { margin-bottom: 24px; }
-    .error { margin: 12px 0; }
-  </style>
 </head>
 <body>
 <header class="site-header">
@@ -149,8 +115,42 @@
   <div class="container">© 2025 Weeklies</div>
 </footer>
 
+<style>
+  /* Preference bubbles */
+  .pref-toolbar { display:flex; gap:12px; align-items:center; margin-bottom:12px; flex-wrap:wrap; }
+  .pref-toolbar .input { max-width: 380px; }
+  .bubbles { display:flex; flex-wrap:wrap; gap:12px; }
+  .bubble {
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:999px;
+    border:2px solid var(--border);
+    background: rgba(0,0,0,0.05);
+    color: var(--text);
+    padding: 10px 14px;
+    cursor:pointer;
+    user-select:none;
+    transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease;
+    opacity: 0.5;
+  }
+  .bubble:hover { transform: translateY(-1px); opacity: 0.7; }
+  .bubble.selected {
+    background: rgba(0,0,0,0.05);
+    border-color: currentColor;
+    box-shadow: 0 0 6px currentColor;
+    opacity: 1;
+  }
+  .section-title { margin: 0 0 6px; font-size: 18px; }
+  .muted { color: var(--muted); font-size: 14px; margin: 0 0 12px; }
+  .allergen-grid { display:grid; gap:10px; grid-template-columns: repeat(2, minmax(0,1fr)); }
+  @media (min-width: 720px) { .allergen-grid { grid-template-columns: repeat(3, minmax(0,1fr)); } }
+  .allergen { display:flex; gap:10px; align-items:center; padding:10px 12px; border:1px solid var(--border); border-radius:12px; background: var(--surface); }
+  .step { margin-bottom: 24px; }
+  .error { margin: 12px 0; }
+</style>
+
 <script>
-  // --- Preferences bubble builder ---
   (function() {
     const DEFAULT_PREFS = [
       'Vegan','Vegetarian','Keto','Paleo','Halal','Kosher','Low Sodium','High Protein',
@@ -307,5 +307,6 @@
     }, { passive: false });
   })();
 </script>
+
 </body>
 </html>

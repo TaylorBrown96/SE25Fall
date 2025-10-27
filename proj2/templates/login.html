@@ -6,35 +6,6 @@
   <title>Login · Weeklies</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
   <script src="{{ url_for('static', filename='script.js') }}" defer></script>
-  <style>
-    /* Local styles for centering the login card */
-    main.main {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0;
-    }
-
-    /* Keep container from collapsing card width */
-    main.main .container {
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    /* Ensure auth card stays at its natural max-width */
-    .auth {
-      width: 100%;
-      max-width: 560px;
-    }
-
-    /* reduce vertical padding inside the card */
-    .auth .card.compact .card-body {
-      padding: .1rem;
-    }
-  </style>
 </head>
 <body>
 <header class="site-header">
@@ -79,5 +50,36 @@
 <footer class="footer">
   <div class="container">© 2025 Weeklies</div>
 </footer>
+
+<style>
+  /* Local styles for centering the login card */
+  main.main {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+  }
+
+  /* Keep container from collapsing card width */
+  main.main .container {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Ensure auth card stays at its natural max-width */
+  .auth {
+    width: 100%;
+    max-width: 560px;
+  }
+
+  /* reduce vertical padding inside the card */
+  .auth .card.compact .card-body {
+    padding: .1rem;
+  }
+</style>
+
 </body>
 </html>

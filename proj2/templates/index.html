@@ -6,88 +6,15 @@
   <title>Home · Weeklies</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
   <script src="{{ url_for('static', filename='script.js') }}" defer></script>
-
-  <!-- Calendar-specific styles (scoped) -->
-  <style>
-    .calendar-wrap {
-      margin-top: 16px;
-    }
-    .topbar {
-      display:flex; align-items:center; justify-content:space-between; gap:12px; margin: 6px 0 16px;
-    }
-    .greet { font-weight:700; font-size:1.0rem; opacity:.9; }
-    .cal-header { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom: 10px; }
-    .cal-title { font-size: 1.4rem; font-weight: 700; }
-    .cal-grid { display:grid; grid-template-columns: repeat(7, 1fr); gap: 10px; }
-    .cal-dow { text-align:center; font-weight:600; opacity:0.7; padding: 6px 0; }
-
-    .day-cell {
-      position: relative;
-      background: var(--card, #0b1220);
-      border: 1px solid rgba(255,255,255,.08);
-      min-height: 110px;
-      border-radius: var(--radius, 14px);
-      padding: 8px;
-      overflow: visible;
-      z-index: 0;
-    }
-    .day-cell:hover { z-index: 50; }
-    .day-cell.today {
-      border-color: rgba(126, 214, 255, .9);
-      box-shadow: 0 0 0 2px rgba(126, 214, 255, .35), 0 6px 18px rgba(126, 214, 255, .15) inset;
-      background-image: linear-gradient(180deg, rgba(126,214,255,.06), transparent);
-    }
-
-    .day-num { font-size:.9rem; opacity:.8; }
-
-    .badge {
-      display:inline-block; padding: 6px 8px; border-radius: 10px; font-size:.78rem;
-      font-weight:600; margin-top: 6px; background: var(--chip-bg, #1f2a44);
-      border: 1px solid rgba(255,255,255,.09); cursor: default;
-    }
-    .badge.has-item { color: #fff; }
-    .badge .dot { display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:6px; vertical-align: middle; }
-
-    .btnrow { display:flex; gap:8px; }
-    .btn { text-decoration:none; }
-
-    /* Keep per-day card hidden; script will read its HTML */
-    .menu-card { display: none; }
-
-    /* Popover injected by script */
-    .menu-popover {
-      position: fixed; z-index: 9999;
-      width: min(340px, 92vw); background: #0e162b;
-      border: 1px solid rgba(255,255,255,.2);
-      border-radius: 12px; padding: 12px;
-      box-shadow: 0 22px 45px rgba(0,0,0,.55);
-      color: #fff; opacity: 0;
-      transform: translateY(6px);
-      transition: opacity .16s ease, transform .16s ease;
-      pointer-events: none;
-    }
-    .menu-popover.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
-    .menu-popover h4 { margin:0 0 6px; font-size:1rem; }
-    .menu-popover .meta { font-size:.85rem; opacity:.85; }
-    .menu-popover .tags { margin-top:8px; font-size:.78rem; opacity:.9; }
-    .menu-popover .arrow {
-      position: fixed; width: 12px; height: 12px;
-      background: #0e162b;
-      border-left: 1px solid rgba(255,255,255,.2);
-      border-top: 1px solid rgba(255,255,255,.2);
-      transform: rotate(45deg); z-index:10000;
-    }
-  </style>
 </head>
 <body>
 <header class="site-header">
   <div class="container">
-    <a class="brand" href="{{ url_for('index') }}">
-      <span class="logo" aria-hidden="true"></span> Weeklies
-    </a>
+    <a class="brand" href="{{ url_for('index') }}"><span class="logo"></span> Weeklies</a>
     <nav>
       <a href="{{ url_for('index') }}">Home</a>
       <a href="{{ url_for('profile') }}">Profile</a>
+      <a href="{{ url_for('orders') }}">Order</a>
       <a href="{{ url_for('db_view') }}">DB</a>
       <a href="{{ url_for('logout') }}" data-confirm="Log out now?">Logout</a>
     </nav>
@@ -163,8 +90,8 @@
 
                 <!-- Hover popover content: ALL meals for the day -->
                 <div class="menu-card">
-                  <h4>{{ month_name }} {{ cell.day }}, {{ year }}</h4>
-                  <div class="meal-list" style="display:flex; flex-direction:column; gap:10px;">
+                  <h4 style="font-size: larger; font-weight: bolder;">{{ month_name }} {{ cell.day }}, {{ year }}</h4>
+                  <div class="meal-list" style="display:flex; flex-direction:column; gap:12px;">
                     {% for m in cell.meals %}
                       <div class="meal-line">
                         <div class="meal-title" style="font-weight:700; margin-bottom:2px;">
@@ -181,6 +108,17 @@
                         {% if m.item.description %}
                           <div class="tags">{{ m.item.description }}</div>
                         {% endif %}
+
+                        <!-- NEW: Order button per meal -->
+                        <div class="actions" style="margin-top:8px;">
+                          <a
+                            class="order-btn"
+                            href="{{ url_for('order') }}?date={{ '%04d-%02d-%02d'|format(year, month, cell.day) }}&meal={{ m.meal }}&itm_id={{ m.item.itm_id }}"
+                            aria-label="Order {{ meal_names.get(m.meal, 'Meal') }}"
+                          >
+                            Order {{ meal_names.get(m.meal, 'Meal') }}
+                          </a>
+                        </div>
                       </div>
                     {% endfor %}
                   </div>
@@ -195,12 +133,89 @@
   </div>
 </main>
 
-
 <footer class="footer">
   <div class="container">© {{ year }} Weeklies</div>
 </footer>
 
-<!-- Floating popover logic -->
+<style>
+  .calendar-wrap { margin-top: 16px; }
+  .greet { font-weight:700; font-size:1.0rem; opacity:.9; }
+  .cal-grid { display:grid; grid-template-columns: repeat(7, 1fr); gap: 10px; }
+  .cal-dow { text-align:center; font-weight:600; opacity:0.7; padding: 6px 0; }
+
+  .day-cell {
+    position: relative;
+    background: var(--card, #0b1220);
+    border: 1px solid rgba(255,255,255,.08);
+    min-height: 110px;
+    border-radius: var(--radius, 12px);
+    padding: 8px;
+    overflow: visible;
+    z-index: 0;
+  }
+  .day-cell:hover { z-index: 50; }
+  .day-cell.today {
+    border-color: rgba(126, 214, 255, .9);
+    box-shadow: 0 0 0 2px rgba(126, 214, 255, .35), 0 6px 18px rgba(126, 214, 255, .15) inset;
+    background-image: linear-gradient(180deg, rgba(126,214,255,.06), transparent);
+  }
+  .day-num { font-size:.9rem; opacity:.8; }
+
+  .badge {
+    display:inline-block; padding: 6px 8px; border-radius: 10px; font-size:.78rem;
+    font-weight:600; margin-top: 6px; background: var(--chip-bg, #1f2a44);
+    border: 1px solid rgba(255,255,255,.09); cursor: default;
+  }
+  .badge.has-item { color: #fff; }
+  .badge .dot { display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:6px; vertical-align: middle; }
+
+  .btnrow { display:flex; gap:8px; }
+  .btn { text-decoration:none; }
+
+  /* Keep per-day card hidden; script will read its HTML */
+  .menu-card { display: none; }
+
+  /* Popover injected by script */
+  .menu-popover {
+    position: fixed; z-index: 9999;
+    width: min(360px, 92vw); background: #0e162b;
+    border: 1px solid rgba(255,255,255,.2);
+    border-radius: 12px; padding: 12px;
+    box-shadow: 0 22px 45px rgba(0,0,0,.55);
+    color: #fff; opacity: 0;
+    transform: translateY(6px);
+    transition: opacity .16s ease, transform .16s ease;
+    pointer-events: none;
+  }
+  .menu-popover.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
+  .menu-popover h4 { margin:0 0 6px; font-size:1rem; }
+  .menu-popover .meta { font-size:.85rem; opacity:.85; }
+  .menu-popover .tags { margin-top:8px; font-size:.78rem; opacity:.9; }
+  .menu-popover .arrow {
+    position: fixed; width: 12px; height: 12px;
+    background: #0e162b;
+    border-left: 1px solid rgba(255,255,255,.2);
+    border-top: 1px solid rgba(255,255,255,.2);
+    transform: rotate(45deg); z-index:10000;
+  }
+
+  /* Order button style (kept minimal, matches your palette) */
+  .order-btn {
+    display:inline-block;
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: 1px solid rgba(91, 140, 255, 0.45);
+    text-decoration: none;
+    font-size: .85rem;
+    font-weight: 700;
+    background: rgba(91, 140, 255, 0.12);
+    transition: filter .15s ease, transform .02s ease, background .15s ease;
+    user-select: none;
+  }
+  .order-btn:hover { filter: brightness(1.08); }
+  .order-btn:active { transform: translateY(1px); }
+</style>
+
 <script>
 (function () {
   const popover = document.createElement('div');
@@ -307,5 +322,6 @@
   window.addEventListener('keydown', e=>{ if(e.key==='Escape') hidePopover(true); });
 })();
 </script>
+
 </body>
 </html>

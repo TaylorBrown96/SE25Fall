@@ -10,12 +10,11 @@
 <body>
 <header class="site-header">
   <div class="container">
-    <a class="brand" href="{{ url_for('index') }}">
-      <span class="logo" aria-hidden="true"></span> Weeklies
-    </a>
+    <a class="brand" href="{{ url_for('index') }}"><span class="logo"></span> Weeklies</a>
     <nav>
       <a href="{{ url_for('index') }}">Home</a>
       <a href="{{ url_for('profile') }}">Profile</a>
+      <a href="{{ url_for('orders') }}">Order</a>
       <a href="{{ url_for('db_view') }}">DB</a>
       <a href="{{ url_for('logout') }}" data-confirm="Log out now?">Logout</a>
     </nav>
@@ -23,37 +22,413 @@
 </header>
 
 <main class="main">
-  <div class="container">
+  <div class="container" style="width: 100%;">
+    <!-- Profile -->
     <div class="page-title">
       <h1>User Profile</h1>
-      <p class="hide-sm">{{ username }}</p>
+      <p class="hide-sm">
+        {{ user.first_name }} {{ user.last_name }} · ID #{{ user.usr_id }}
+      </p>
     </div>
 
-    <div class="card max-w-lg">
+    {% if pw_updated %}
+      <div class="flash success">Password changed successfully.</div>
+    {% elif pw_error %}
+      {% if pw_error == 'incorrect_current' %}
+        <div class="flash danger">Current password is incorrect.</div>
+      {% elif pw_error == 'mismatch' %}
+        <div class="flash danger">New password and confirmation do not match.</div>
+      {% elif pw_error == 'too_short' %}
+        <div class="flash danger">New password must be at least 6 characters and meet requirements.</div>
+      {% elif pw_error == 'same_as_current' %}
+        <div class="flash danger">New password cannot be the same as the current password.</div>
+      {% else %}
+        <div class="flash danger">Password change failed. Please try again.</div>
+      {% endif %}
+    {% endif %}
+
+    <div class="card max-w-lg" style="max-width: var(--container);">
+      <!-- NEW: header row with title + Edit button -->
+      <div class="card-header" style="display:flex; align-items:center; justify-content:space-between; padding:12px 16px; border-bottom:1px solid var(--border);">
+        <h2 style="margin:0; font-size:20px; font-weight:700;">User Profile</h2>
+        <div style="display:flex; gap:8px;">
+          <a class="btn btn-outline btn-sm" href="{{ url_for('edit_profile') }}">Edit</a>
+          <button type="button" class="btn btn-primary btn-sm" id="openChangePwBtn">Change Password</button>
+        </div>
+      </div>
+
       <div class="card-body">
-        <div class="table-wrap">
-          <table class="table">
-            <tbody>
-              <tr><th scope="row">Username</th><td>{{ username }}</td></tr>
-              <tr><th scope="row">Email</th><td>{{ email }}</td></tr>
-              <tr><th scope="row">Phone</th><td>{{ phone }}</td></tr>
-              <tr><th scope="row">Wallet</th><td>{{ wallet }}</td></tr>
-              <tr><th scope="row">Preferences</th><td>{{ preferences }}</td></tr>
-            </tbody>
-          </table>
+        <div class="meta-grid">
+          <div class="meta-item">
+            <div class="k">User ID</div>
+            <div class="v">{{ user.usr_id }}</div>
+          </div>
+          <div class="meta-item">
+            <div class="k">Name</div>
+            <div class="v">{{ user.first_name }} {{ user.last_name }}</div>
+          </div>
+          <div class="meta-item">
+            <div class="k">Email</div>
+            <div class="v">{{ user.email }}</div>
+          </div>
+          <div class="meta-item">
+            <div class="k">Phone</div>
+            <div class="v">{{ user.phone }}</div>
+          </div>
+          <div class="meta-item">
+            <div class="k">Wallet</div>
+            <div class="v">$ {{ user.wallet }}</div>
+          </div>
+          <div class="meta-item">
+            <div class="k">Password</div>
+            <div class="v">
+              ••••••••••••
+            </div>
+          </div>
         </div>
 
-        <div class="btn-row mt-4">
-          <a class="btn" href="{{ url_for('index') }}">Home</a>
-          <a class="btn btn-outline" href="{{ url_for('logout') }}" data-confirm="Log out now?">Logout</a>
+        <!-- Allergies -->
+        <div style="margin-top:16px">
+          <div class="k" style="font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; margin-bottom: 5px;">Allergies</div>
+          {% set allergy_list = (user.allergies or '') | trim %}
+          {% if allergy_list %}
+            {% set items = allergy_list.split(',') %}
+            <div class="tags" aria-label="Allergies">
+              {% for a in items %}
+                {% set label = a.strip() %}
+                {% if label %}
+                  <span class="tag">{{ label }}</span>
+                {% endif %}
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="v">None</div>
+          {% endif %}
+        </div>
+
+        <!-- Preferences as bubbles -->
+        <div style="margin-top:16px">
+          <div class="k" style="font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; margin-bottom: 5px;">Preferences</div>
+          <div id="prefBubbles" class="bubbles" data-prefs="{{ (user.preferences or '') | e }}"></div>
         </div>
       </div>
     </div>
+
+    <!-- Order Tracking -->
+    <div class="page-title" style="margin-top: 20px;">
+      <h1>Order Tracking</h1>
+    </div>
+
+    <div class="card max-w-lg " style="max-width: var(--container);">
+      <div class="card-body">
+        {% if orders %}
+        <div class="table-wrap">
+          <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">Order ID</th>
+                <th scope="col">Restaurant</th> <!-- NEW -->
+                <th scope="col">Date</th>
+                <th scope="col">Status</th>
+                <th scope="col">Receipt</th>
+                <th scope="col">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for order in orders %}
+              <tr>
+                <td>{{ order.id }}</td>
+                <td>{{ order.restaurant }}</td> <!-- NEW -->
+                <td>{{ order.date }}</td>
+                <td>
+                  {% set s = order.status|lower %}
+                  {% if s == 'delivered' %}
+                    <span class="status-bubble status-delivered">Delivered</span>
+                  {% elif s == 'preparing' %}
+                    <span class="status-bubble status-preparing">Preparing</span>
+                  {% elif s == 'cancelled' %}
+                    <span class="status-bubble status-cancelled">Cancelled</span>
+                  {% elif s == 'ordered' %}
+                    <span class="status-bubble status-ordered">Ordered</span>
+                  {% else %}
+                    {{ order.status }}
+                  {% endif %}
+                </td>
+                <td>
+                  <a class="btn btn-outline btn-sm"
+                    href="{{ url_for('order_receipt', ord_id=order.id) }}">
+                    PDF
+                  </a>
+                </td>
+                <td>{{ order.total }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <p>No orders found.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Change Password Modal -->
+  <div id="pwModalBackdrop" class="modal-backdrop" aria-hidden="true"></div>
+  <div id="pwModal" class="modal-sheet" role="dialog" aria-modal="true" aria-labelledby="pwModalTitle" aria-hidden="true">
+    <div class="modal-head">
+      <h3 id="pwModalTitle" style="margin:0; font-size:18px;">Change Password</h3>
+      <button type="button" class="btn btn-outline btn-sm" id="closePwModalBtn" aria-label="Close">Close</button>
+    </div>
+    <form id="pwForm" class="modal-body" novalidate method="POST" action="{{ url_for('change_password') }}">
+      <div class="form-row">
+        <label for="pwCurrent">Current password</label>
+        <input class="input" id="pwCurrent" name="current_password" type="password" required>
+      </div>
+      <div class="form-row" style="margin-top:10px;">
+        <label for="pwNew">New password</label>
+        <input class="input" id="pwNew" name="new_password" type="password" minlength="6" required>
+      </div>
+      <div class="form-row" style="margin-top:10px;">
+        <label for="pwConfirm">Confirm new password</label>
+        <input class="input" id="pwConfirm" name="confirm_password" type="password" minlength="6" required>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-outline" id="cancelPwBtn">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="submitPwBtn" disabled>Update Password</button>
+      </div>
+    </form>
   </div>
 </main>
 
 <footer class="footer">
   <div class="container">© 2025 Weeklies</div>
 </footer>
+
+<style>
+  .bubbles { display:flex; flex-wrap:wrap; gap:12px; }
+  .bubble {
+    display:inline-flex; align-items:center; justify-content:center;
+    border-radius:999px; border:2px solid var(--border);
+    background: rgba(0,0,0,0.05); color: var(--text);
+    padding: 8px 14px; user-select:none;
+    transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease;
+    opacity:.5;
+  }
+  .bubble.selected { border-color: currentColor; box-shadow:0 0 6px currentColor; opacity:1; }
+
+  .status-bubble {
+    display:inline-flex; align-items:center; justify-content:center;
+    border-radius:999px; padding:4px 10px; font-size:13px; font-weight:600; color:#fff;
+  }
+  .status-delivered {background-color:#28a745;} /* green */
+  .status-preparing {background-color:#fd7e14;} /* orange */
+  .status-cancelled {background-color:#dc3545;} /* red */
+  .status-ordered  {background-color:#ffc107;} /* yellow */
+
+  .meta-grid { display:grid; grid-template-columns:1fr; gap:14px; }
+  @media (min-width:640px){ .meta-grid { grid-template-columns:1fr 1fr; } }
+  .meta-item { padding:10px 12px; border:1px solid var(--border); border-radius:12px; background:var(--surface); }
+  .meta-item .k { font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; }
+  .meta-item .v { margin-top:4px; word-break:break-word; }
+  .tags { display:flex; flex-wrap:wrap; gap:8px; }
+  .tag { padding:6px 10px; border:1px solid var(--border); border-radius:999px; background:var(--surface); font-size:14px; }
+  pre.menu { margin:0; white-space:pre-wrap; word-break:break-word; background:var(--surface); padding:10px; border-radius:8px; border:1px solid var(--border); }
+  /* Modal basics */
+  .modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,.45); display:none; z-index:1000; }
+  .modal-sheet { position:fixed; left:50%; top:50%; transform:translate(-50%,-50%); width:min(92vw,480px); background:var(--surface); border:1px solid var(--border); border-radius:14px; display:none; z-index:1001; }
+  .modal-backdrop.show, .modal-sheet.show { display:block; }
+  .modal-head {
+    display:flex; align-items:center; justify-content:space-between;
+    padding: 14px 16px; border-bottom: 1px solid var(--border);
+  }
+  .modal-body { padding: 16px; }
+  .modal-actions { display:flex; justify-content:flex-end; gap:10px; padding: 12px 16px; border-top:1px solid var(--border); }
+
+  /* Input status colors */
+  .input.is-ok  { border-color:#28a745 !important; box-shadow:0 0 0 3px rgba(40,167,69,.15); }
+  .input.is-bad { border-color:#dc3545 !important; box-shadow:0 0 0 3px rgba(220,53,69,.15); }
+  .input.is-warn{ border-color:#ffc107 !important; box-shadow:0 0 0 3px rgba(255,193,7,.18); }
+
+  .reqs { margin: 10px 0 0; font-size: 13px; color: var(--muted); }
+  .reqs li { margin: 2px 0; }
+  .reqs .ok { color: #28a745; }
+  .reqs .bad { color: #dc3545; }
+</style>
+
+<script>
+  // Render read-only bubbles from CSV in data-prefs, matching register page styling
+  (function renderPrefBubbles(){
+    const root = document.getElementById('prefBubbles');
+    if (!root) return;
+    const raw = (root.dataset.prefs || '').trim();
+    if (!raw) { root.innerHTML = '<span class="v">None</span>'; return; }
+
+    const labels = raw.split(',')
+      .map(s => s.trim())
+      .filter(Boolean);
+
+    if (!labels.length) { root.innerHTML = '<span class="v">None</span>'; return; }
+
+    function randomColor(){
+      const h = Math.floor(Math.random()*360);
+      const s = 65 + Math.random()*25;
+      const l = 55 + Math.random()*15;
+      return `hsl(${h} ${s}% ${l}%)`;
+    }
+
+    // cap to 20 for layout sanity (mirror register page behavior)
+    labels.slice(0, 20).forEach(label => {
+      const b = document.createElement('span');
+      b.className = 'bubble selected';
+      b.textContent = label;
+      const color = randomColor();
+      b.style.borderColor = color;
+      b.style.color = color;
+      b.style.fontSize = Math.random() < 0.5 ? '14px' : '16px';
+      root.appendChild(b);
+    });
+  })();
+
+  (function () {
+    const form   = document.getElementById('pwForm');
+    const iptCur = document.getElementById('pwCurrent');
+    const iptNew = document.getElementById('pwNew');
+    const iptCf  = document.getElementById('pwConfirm');
+    const submit = document.getElementById('submitPwBtn');
+
+    function setState(el, state) {
+      if (!el) return;
+      el.classList.remove('is-ok','is-bad','is-warn');
+      if (state) el.classList.add(state); // 'is-ok' | 'is-bad' | 'is-warn'
+    }
+
+    // simple strength: >=6 chars + at least one letter and one digit
+    function strongEnough(s) {
+      return s && s.length >= 6 && /[A-Za-z]/.test(s) && /\d/.test(s);
+    }
+
+    function update() {
+      const curVal = iptCur?.value || '';
+      const newVal = iptNew?.value || '';
+      const cfVal  = iptCf?.value  || '';
+
+      const curFilled  = curVal.length > 0;
+      const newFilled  = newVal.length > 0;
+      const cfFilled   = cfVal.length  > 0;
+      const strengthOK = strongEnough(newVal);
+      const matchOK    = newVal && cfVal && (newVal === cfVal);
+
+      // Current: green when filled, warn when empty
+      setState(iptCur, curFilled ? 'is-ok' : 'is-warn');
+
+      // New:
+      // - warn if empty
+      // - ok if strengthOK
+      // - bad if not strong enough
+      if (!newFilled) {
+        setState(iptNew, 'is-warn');
+      } else {
+        setState(iptNew, strengthOK ? 'is-ok' : 'is-bad');
+      }
+
+      // Confirm:
+      // - warn until it matches (even if filled)
+      // - ok only when matches
+      if (!cfFilled) {
+        setState(iptCf, 'is-warn');
+      } else {
+        setState(iptCf, matchOK ? 'is-ok' : 'is-warn');
+      }
+
+      // Enable submit only when: current filled, new strong, and confirm matches
+      submit.disabled = !(curFilled && strengthOK && matchOK);
+    }
+
+    // init + live updates
+    [iptCur, iptNew, iptCf].forEach(el => {
+      el && el.addEventListener('input', update);
+      el && el.addEventListener('blur', update);
+    });
+    form && form.addEventListener('submit', (e) => {
+      if (submit.disabled) {
+        e.preventDefault();
+        update();
+      }
+    });
+
+    // initial state
+    update();
+  })();
+
+  document.addEventListener('DOMContentLoaded', function() {
+    const openBtn   = document.getElementById('openChangePwBtn');
+    const closeBtn  = document.getElementById('closePwModalBtn');
+    const cancelBtn = document.getElementById('cancelPwBtn');
+    const modal     = document.getElementById('pwModal');
+    const backdrop  = document.getElementById('pwModalBackdrop');
+
+    const form   = document.getElementById('pwForm');
+    const iptCur = document.getElementById('pwCurrent');
+    const iptNew = document.getElementById('pwNew');
+    const iptCf  = document.getElementById('pwConfirm');
+    const submit = document.getElementById('submitPwBtn');
+
+    function showModal() {
+      modal.classList.add('show');
+      backdrop.classList.add('show');
+      setTimeout(() => iptCur.focus(), 0);
+    }
+    function hideModal() {
+      modal.classList.remove('show');
+      backdrop.classList.remove('show');
+      form.reset();
+      update(); // reset button state/colors
+    }
+
+    function setState(el, state) {
+      el.classList.remove('is-ok','is-bad','is-warn');
+      if (state) el.classList.add(state); // 'is-ok' | 'is-bad' | 'is-warn'
+    }
+
+    function update() {
+      const curFilled = !!iptCur.value;
+      const newFilled = !!iptNew.value;
+      const cfFilled  = !!iptCf.value;
+      const match = newFilled && cfFilled && (iptNew.value === iptCf.value);
+
+      setState(iptCur, curFilled ? 'is-ok' : 'is-warn');
+
+      if (!newFilled && !cfFilled) {
+        setState(iptNew, 'is-warn');
+        setState(iptCf,  'is-warn');
+      } else if (newFilled && !cfFilled) {
+        setState(iptNew, 'is-warn');
+        setState(iptCf,  'is-warn');
+      } else if (!newFilled && cfFilled) {
+        setState(iptNew, 'is-warn');
+        setState(iptCf,  'is-warn');
+      } else {
+        setState(iptNew, match ? 'is-ok' : 'is-bad');
+        setState(iptCf,  match ? 'is-ok' : 'is-bad');
+      }
+
+      submit.disabled = !(curFilled && match);
+    }
+
+    // Wire events (guard if element missing)
+    openBtn  && openBtn.addEventListener('click', showModal);
+    closeBtn && closeBtn.addEventListener('click', hideModal);
+    cancelBtn&& cancelBtn.addEventListener('click', hideModal);
+    backdrop && backdrop.addEventListener('click', hideModal);
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') hideModal(); });
+
+    [iptCur, iptNew, iptCf].forEach(el => { el && el.addEventListener('input', update); });
+
+    // initial
+    update();
+  });
+</script>
+
 </body>
 </html>
