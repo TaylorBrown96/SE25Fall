@@ -110,3 +110,10 @@ CSV CONTEXT:
         output = int(re.search(match, llm_output).group(1))
 
         return output
+    
+    def update_menu(self, menu: str, preferences, allergens, date, meal_number) -> str:
+        itm_id = self.pick_menu_item(preferences, allergens, date, meal_number)
+        if menu is None or len(menu) < 1:
+            return f"[{date},{itm_id},{meal_number}]"
+        return f"{menu},[{date},{itm_id},{meal_number}]"
+        

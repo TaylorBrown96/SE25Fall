@@ -1,0 +1,11 @@
+## From Kunal's requirements
+Flask>=2.3
+pytest>=8.0
+pdoc>=14.0
+reportlab>=3.6.1
+
+## New Requirements
+pandasp
+torch
+transformers
+accelerate
