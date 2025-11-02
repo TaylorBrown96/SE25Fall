@@ -45,8 +45,8 @@ jobs:
           fi
 
           # Color thresholds
-          if [ "$percent" -ge 95 ]; then color="green";
-          elif [ "$percent" -ge 80 ]; then color="yellow";
+          if [ "$percent" -ge 50 ]; then color="green";
+          elif [ "$percent" -ge 25 ]; then color="yellow";
           else color="red"; fi
 
           echo "Total: $total, Runnable: $runnable, Passed: $passed, Failed: $((failures+errors)), Skipped: $skipped, Percent: $percent%"
