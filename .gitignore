@@ -1,0 +1,60 @@
+# Python cache and build
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# IDEs / editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Test and coverage artifacts
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.mypy_cache/
+.dmypy.json
+.pyre/
+
+# Generated docs / reports
+site/
+docs/
+*.html
+*.pdf
+
+# Databases (important!)
+proj2/CSC510_DB.db
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+
+# Environment / secrets
+.env
+.env.*
+
+# CI outputs / temporary files
+coverage.xml
+report.xml
+*.tmp

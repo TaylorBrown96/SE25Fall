@@ -20,4 +20,50 @@ jobs:
       - name: Run tests (proj2)
         run: |
           export PYTHONPATH=$PYTHONPATH:./proj2
-          pytest -q
+          pytest -q --cov=proj2 --cov-report=xml --cov-report=term-missing
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./coverage.xml
+          fail_ci_if_error: false
+      - name: Build tests badge JSON
+        working-directory: proj2
+        run: |
+          REPORT="pytest-report.xml"
+          total=$(grep -c "<testcase" "$REPORT" || true)
+          failures=$(grep -c "<failure" "$REPORT" || true)
+          errors=$(grep -c "<error" "$REPORT" || true)
+          skipped=$(grep -c "<skipped" "$REPORT" || true)
+
+          # Treat “percent passed” as passed / (total - skipped)
+          runnable=$(( total - skipped ))
+          passed=$(( runnable - failures - errors ))
+          if [ "$runnable" -gt 0 ]; then
+            percent=$(( 100 * passed / runnable ))
+          else
+            percent=100
+          fi
+
+          # Color thresholds
+          if [ "$percent" -ge 95 ]; then color="green";
+          elif [ "$percent" -ge 80 ]; then color="yellow";
+          else color="red"; fi
+
+          echo "Total: $total, Runnable: $runnable, Passed: $passed, Failed: $((failures+errors)), Skipped: $skipped, Percent: $percent%"
+
+          cat > tests-badge.json <<EOF
+          {
+            "schemaVersion": 1,
+            "label": "tests",
+            "message": "${percent}% passed",
+            "color": "${color}"
+          }
+          EOF
+      - name: Upload tests badge to Gist
+        uses: exuanbo/actions-deploy-gist@v1
+        with:
+          token: ${{ secrets.GIST_TOKEN }}
+          gist_id: ${{ secrets.TESTS_BADGE_GIST_ID }}
+          file_path: proj2/tests-badge.json
+          file_type: text/plain
+
