@@ -11,22 +11,29 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+
       - name: Install deps
         run: |
           python -m pip install --upgrade pip
           pip install -r proj2/requirements.txt
-      - name: Build pdoc site (no source) from proj2
+          pip install pdoc markdown
+
+      - name: Build API docs (pdoc) + convert Markdown pages
+        env:
+          PYTHONPATH: ${{ github.workspace }}
         run: |
-          cd proj2
-          rm -rf site
-          # document EVERYTHING in proj2 (new files auto-included)
-          pdoc --no-show-source --docformat google -o site .
-          # include your markdown docs too, if present
-          mkdir -p site/docs
-          cp -r docs/* site/docs/ || true
+          rm -rf proj2/site
+          # pdoc picks up settings from pdoc.toml, and loads custom.css via template dir
+          pdoc proj2 --template-dir proj2/templates -o proj2/site
+          # convert proj2/docs/*.md -> HTML + create landing index.html
+          python scripts/build_docs.py
+          # ensure Pages doesn't try to Jekyll-transform
+          touch proj2/site/.nojekyll
+
       - name: Publish to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:

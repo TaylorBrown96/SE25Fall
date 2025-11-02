@@ -1,5 +1,5 @@
 ﻿# Project Documentation
 
-- **Setup & Run** — see the root README.md.
-- **Architecture (overview)** — see docs/architecture.md.
-- **API (generated)** — CI uses **pdoc** to generate API pages from docstrings.
+- **Setup & Run** — see the root `README.md`.
+- **Architecture (overview)** — see [Architecture](./architecture.html).
+- **API (generated)** — see [API Reference](../proj2.html).
