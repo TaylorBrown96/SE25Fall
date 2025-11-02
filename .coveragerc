@@ -1,0 +1,14 @@
+[run]
+source = proj2
+branch = True
+omit =
+    */__init__.py
+    */migrations/*
+    */.venv/*
+    */.pytest_cache/*
+
+[report]
+fail_under = 80
+show_missing = True
+skip_covered = True
+precision = 1

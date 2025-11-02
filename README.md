@@ -3,7 +3,12 @@
 [![CI](https://img.shields.io/github/actions/workflow/status/TaylorBrown96/SE25Fall/ci.yml?branch=main)](https://github.com/TaylorBrown96/SE25Fall/actions)
 [![Docs](https://img.shields.io/github/actions/workflow/status/TaylorBrown96/SE25Fall/docs.yml?label=docs)](https://github.com/TaylorBrown96/SE25Fall/actions)
 [![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)]()
-
+![Tests](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/TaylorBrown96/<GIST_ID>/raw/tests-badge.json)
+[![codecov](https://codecov.io/gh/TaylorBrown96/SE25Fall/branch/main/graph/badge.svg)](https://codecov.io/gh/TaylorBrown96/SE25Fall)
+![License](https://img.shields.io/github/license/TaylorBrown96/SE25Fall)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Lint: ruff](https://img.shields.io/badge/lint-ruff-46a2f1?logo=ruff&logoColor=white)](https://github.com/astral-sh/ruff)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.xxxxx.svg)](https://doi.org/10.5281/zenodo.xxxxx)
 ---
 
 ## ⚙️Installation
