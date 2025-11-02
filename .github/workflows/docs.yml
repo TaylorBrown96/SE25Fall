@@ -1,7 +1,21 @@
 name: Docs
+
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]                # deploy on main
+    paths:
+      - "proj2/**"
+      - "scripts/**"
+      - "pdoc.toml"
+      - ".github/workflows/docs.yml"
+  pull_request:
+    branches: ["main"]                # build on PRs targeting main
+    paths:
+      - "proj2/**"
+      - "scripts/**"
+      - "pdoc.toml"
+      - ".github/workflows/docs.yml"
+  workflow_dispatch:                  # allow manual run from Actions tab
 
 permissions:
   contents: write
@@ -27,14 +41,21 @@ jobs:
           PYTHONPATH: ${{ github.workspace }}
         run: |
           rm -rf proj2/site
-          # pdoc picks up settings from pdoc.toml, and loads custom.css via template dir
-          pdoc proj2 --template-dir proj2/templates -o proj2/site
-          # convert proj2/docs/*.md -> HTML + create landing index.html
+          pdoc proj2 --no-show-source --template-dir proj2/pdoc_templates -o proj2/site
           python scripts/build_docs.py
-          # ensure Pages doesn't try to Jekyll-transform
           touch proj2/site/.nojekyll
 
+      # On PRs / manual runs, attach the site as an artifact so you can preview it
+      - name: Upload docs artifact (PR/Manual)
+        if: github.event_name != 'push' || github.ref != 'refs/heads/main'
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs-site
+          path: proj2/site
+
+      # Only publish when pushing to main
       - name: Publish to GitHub Pages
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
