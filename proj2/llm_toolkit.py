@@ -11,7 +11,7 @@ LLM class for local language model interactions
 class LLM:
 
     ## LLM parameters
-    device = "cpu"
+    device = "gpu" if torch.cuda.is_available() else "cpu"
     model = "ibm-granite/granite-4.0-micro"
 
     """
@@ -23,7 +23,8 @@ class LLM:
     def __init__(self, tokens: int = 500):
         self.tokenizer = AutoTokenizer.from_pretrained(self.model, cache_dir=os.path.join(os.path.dirname(__file__), '.hf_cache'))
         # drop device_map if running on CPU
-        self.model = AutoModelForCausalLM.from_pretrained(self.model, device_map=self.device)
+        if self.device == "cpu":    
+            self.model = AutoModelForCausalLM.from_pretrained(self.model, device_map=self.device)
         self.model.eval()
         self.tokens = tokens
 
