@@ -1,11 +1,9 @@
-## From Kunal's requirements
 Flask>=2.3
 pytest>=8.0
 pdoc>=14.0
 reportlab>=3.6.1
 
-## New Requirements
-pandasp
-torch
-transformers
-accelerate
+pandas==2.3.3
+torch==2.9.0
+transformers==4.53.3
+accelerate==1.11.0

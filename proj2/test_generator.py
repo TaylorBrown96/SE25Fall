@@ -7,6 +7,7 @@ from io import StringIO
 import menu_generation
 import llm_toolkit
 from sqlQueries import *
+from Flask_app import parse_generated_menu
 
 db_file = os.path.join(os.path.dirname(__file__), 'CSC510_DB.db')
 
@@ -16,7 +17,6 @@ menu_items = pd.read_sql_query("SELECT * FROM MenuItem WHERE instock == 1", conn
 restaurants = pd.read_sql_query("SELECT rtr_id, hours FROM Restaurant WHERE status==\"Open\"", conn)
 close_connection(conn)
 
-r"""
 def test_llm():
     output = generator.generate("This is a test", "test")
     match = r"<\|start_of_role\|>assistant<\|end_of_role\|>(.*)<\|end_of_text\|>"
@@ -73,7 +73,7 @@ def test_invalid_get_meal_and_order_time():
         assert False
     except Exception:
         assert True
-"""
+
 def test_get_weekday():
     assert menu_generation.get_weekday("2025-11-02") == "Sun"
     assert menu_generation.get_weekday("2025-11-03") == "Mon"
@@ -191,6 +191,10 @@ item_id,name,description,price,calories
         assert True
 
 def test_invalid_format_llm_output_partial():
+    partial_input = "<|end_of_text|><|start_of_role|>assistant<|end_of_role|>**None**<|end_of_text|>"
+    assert menu_generation.format_llm_output(partial_input) == -1
+    partial_input = "<|end_of_text|><|start_of_role|>assistant<|end_of_role|><|end_of_text|>"
+    assert menu_generation.format_llm_output(partial_input) == -1
     partial_input = "<|end_of_text|><|start_of_role|>assistant<|end_of_role|>1d2<|end_of_text|>"
     try:
         menu_generation.format_llm_output(partial_input)
@@ -354,4 +358,42 @@ def test_filter_closed_restaurants():
     assert filtered_items[filtered_items["rtr_id"] == 18].shape[0] == 0
     assert filtered_items[filtered_items["rtr_id"] == 19].shape[0] == 0
     assert filtered_items[filtered_items["rtr_id"] == 20].shape[0] == 1
+
+def test_MenuGenerator():
+    generator = menu_generation.MenuGenerator()
+    menu1 = generator.update_menu(menu = None, preferences = "high protein,low carb", allergens = "Peanuts,Shellfish", date = "2025-10-14", meal_number = 2)
+    menu2 = generator.update_menu(menu = menu1, preferences = "high protein,low carb", allergens = "Peanuts,Shellfish", date = "2025-10-14", meal_number = 3)
+    menu3 = generator.update_menu(menu = menu2, preferences = "high protein,low carb", allergens = "Peanuts,Shellfish", date = "2025-10-15", meal_number = 1)
+    menu4 = generator.update_menu(menu = menu3, preferences = "high protein,low carb", allergens = "Peanuts,Shellfish", date = "2025-10-15", meal_number = 2)
+    menu5 = generator.update_menu(menu = menu4, preferences = "high protein,low carb", allergens = "Peanuts,Shellfish", date = "2025-10-15", meal_number = 3)
+
+    parsed1 = parse_generated_menu(menu1)
+    parsed2 = parse_generated_menu(menu2)
+    parsed3 = parse_generated_menu(menu3)
+    parsed4 = parse_generated_menu(menu4)
+    parsed5 = parse_generated_menu(menu5)
+
+    assert parsed1["2025-10-14"][0] == parsed2["2025-10-14"][0]
+    assert parsed1["2025-10-14"][0] == parsed3["2025-10-14"][0]
+    assert parsed1["2025-10-14"][0] == parsed4["2025-10-14"][0]
+    assert parsed1["2025-10-14"][0] == parsed5["2025-10-14"][0]
+    assert parsed2["2025-10-14"][1] == parsed3["2025-10-14"][1]
+    assert parsed2["2025-10-14"][1] == parsed4["2025-10-14"][1]
+    assert parsed2["2025-10-14"][1] == parsed5["2025-10-14"][1]
+    assert parsed3["2025-10-15"][0] == parsed4["2025-10-15"][0]
+    assert parsed3["2025-10-15"][0] == parsed5["2025-10-15"][0]
+    assert parsed4["2025-10-15"][1] == parsed5["2025-10-15"][1]
+
+    assert menu_items[menu_items["itm_id"] == parsed5["2025-10-14"][0]["itm_id"]].shape[0] == 1
+    assert menu_items[menu_items["itm_id"] == parsed5["2025-10-14"][1]["itm_id"]].shape[0] == 1
+    assert menu_items[menu_items["itm_id"] == parsed5["2025-10-15"][0]["itm_id"]].shape[0] == 1
+    assert menu_items[menu_items["itm_id"] == parsed5["2025-10-15"][1]["itm_id"]].shape[0] == 1
+    assert menu_items[menu_items["itm_id"] == parsed5["2025-10-15"][2]["itm_id"]].shape[0] == 1
+
+    assert parsed5["2025-10-14"][0]["meal"] == 2
+    assert parsed5["2025-10-14"][1]["meal"] == 3
+    assert parsed5["2025-10-15"][0]["meal"] == 1
+    assert parsed5["2025-10-15"][1]["meal"] == 2
+    assert parsed5["2025-10-15"][2]["meal"] == 3
+    
 

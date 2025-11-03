@@ -12,6 +12,10 @@ from sqlQueries import *
 
 db_file = os.path.join(os.path.dirname(__file__), 'CSC510_DB.db')
 
+## LLM error handling
+MAX_LLM_TRIES = 3
+LLM_ATTRIBUTE_ERROR = -1
+
 ## Increase to increase the sample size the AI can draw from at the cost of increased runtime
 ITEM_CHOICES = 10
 
@@ -27,15 +31,13 @@ Provide only the itm_id as output
 CSV CONTEXT:
 {context}'''
 
-## Regex used for finding LLM Output
+## Regex used for parsing a number from LLM Output
 LLM_OUTPUT_MATCH = r"<\|start_of_role\|>assistant<\|end_of_role\|>(\d+)<\|end_of_text\|>"
 
 ## Preset Meal times - In the future, times will be user-provided
 BREAKFAST_TIME = 1000
 LUNCH_TIME = 1400
 DINNER_TIME = 2000
-
-
 
 """
 Maps a meal number to it's cooresponding meal as a string as well as its cooreponding meal time
@@ -44,8 +46,8 @@ Args:
     meal_number (int): The meal number to get the meal and order times for
 
 Returns:
-    meal (str): The name of the meal as a string ("breakfast", "lunch", or "dinner")
-    order_time (int): The time the meal is typically ordered at in HHMM format (in 24H time)
+    str: The name of the meal as a string ("breakfast", "lunch", or "dinner")
+    int: The time the meal is typically ordered at in HHMM format (in 24H time)
 
 Raises:
     ValueError: if meal_number is not 1, 2, or 3
@@ -74,7 +76,7 @@ Args:
     date (str): The date string in YYYY-MM-DD format
 
 Returns:
-    weekday (str): The corresponding day of the week ("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
+    str: The corresponding day of the week ("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
 
 Raises:
     ValueError: if the date string is not in the correct format (YYYY-MM-DD) or is invalid
@@ -93,15 +95,18 @@ Args:
     output (str): The output from the llm_toolkit LLM
 
 Returns:
-    itm_id (int): The item ID extracted from the LLM output
+    int: The item ID extracted from the LLM output
 
 Raises:
     ValueError: if the LLM output does not match the expected format or if multiple matches are found
 """
 def format_llm_output(output: str) -> int:
-    print(output)
     match = LLM_OUTPUT_MATCH
-    result = int(re.search(match, output).group(1))
+    result = 0
+    try:
+        result = int(re.search(match, output).group(1))
+    except AttributeError:
+        return LLM_ATTRIBUTE_ERROR
     try:
         print(re.search(match, output).group(2))
         raise ValueError("Injection attack may have gotten through. There should not be multiple matches for LLM output.")
@@ -116,7 +121,7 @@ Args:
     items (pd.DataFrame): The dataframe containing the items
 
 Returns:
-    choices (List[int]): The list of item_ids of the selected items
+    List[int]: The list of item_ids of the selected items
 """
 def limit_scope(items: pd.DataFrame) -> List[int]:
     num_items = items.shape[0]
@@ -200,9 +205,9 @@ class MenuGenerator:
         order_time (int): The time the meal is typically ordered at in HHMM format (in 24H time)
     
     Returns:
-        context (str): The context block for the LLM in CSV format
+        str: The context block for the LLM in CSV format
     """
-    def get_context(self, allergens: str, date: str, order_time:int) -> str:
+    def __get_context(self, allergens: str, date: str, order_time:int) -> str:
         start = time.time()
         
         combined = pd.merge(self.menu_items, self.restaurants, on="rtr_id", how="left")
@@ -218,6 +223,7 @@ class MenuGenerator:
 
         context_data = "item_id,name,description,price,calories\n"
         
+        ## Create the context data with the chosen items
         for x in choices:
             row = combined.iloc[x]
             context_data += f"{row['itm_id']},{row['name']},{row['description']},{row['price']},{row['calories']}\n"
@@ -236,23 +242,30 @@ class MenuGenerator:
         meal_number (int): The meal number (1 for breakfast, 2 for lunch, 3 for dinner)
 
     Returns:
-        itm_id (int): The item_id of the selected menu item
+        int: The item_id of the selected menu item
     """
-    def pick_menu_item(self, preferences: str, allergens: str, date: str, meal_number: int) -> int:
+    def __pick_menu_item(self, preferences: str, allergens: str, date: str, meal_number: int) -> int:
         
         meal, order_time = get_meal_and_order_time(meal_number)
 
-        context = self.get_context(allergens, date, order_time)
+        context = self.__get_context(allergens, date, order_time)
 
+        ## Gets the prompt
         system = SYSTEM_TEMPLATE
         prompt = PROMPT_TEMPLATE
-        
+
+        ## Initializes variables in prompt
         prompt = prompt.replace("{preferences}", preferences)
         prompt = prompt.replace("{context}", context)
         prompt = prompt.replace("{meal}", meal)
 
-        llm_output = self.generator.generate(system, prompt)
-        return format_llm_output(llm_output)
+        ## Tries to get output from LLM a number of times
+        for x in range(MAX_LLM_TRIES):
+            llm_output = self.generator.generate(system, prompt)
+            output = format_llm_output(llm_output)
+            if output > 0:
+                return output
+        raise RuntimeError(f"LLM has failed {MAX_LLM_TRIES} times to generate a meal. This may be a critical error, a lack of options, or a bad prompt.")
     
     """
     Updates the menu string with a new menu item based on user preferences, allergens, date, and meal number
@@ -265,10 +278,10 @@ class MenuGenerator:
         meal_number (int): The meal number (1 for breakfast, 2 for lunch, 3 for dinner)
     
     Returns:
-        menu (str): The updated menu string
+        str: The updated menu string
     """
     def update_menu(self, menu: str, preferences: str, allergens: str, date: str, meal_number: int) -> str:
-        itm_id = self.pick_menu_item(preferences, allergens, date, meal_number)
+        itm_id = self.__pick_menu_item(preferences, allergens, date, meal_number)
         if menu is None or len(menu) < 1:
             return f"[{date},{itm_id},{meal_number}]"
         return f"{menu},[{date},{itm_id},{meal_number}]"
