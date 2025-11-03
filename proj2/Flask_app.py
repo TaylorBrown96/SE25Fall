@@ -7,12 +7,12 @@ from io import BytesIO
 from flask import jsonify
 from sqlite3 import IntegrityError
 from datetime import timedelta, date, datetime
-from pdf_receipt import generate_order_receipt_pdf
+from proj2.pdf_receipt import generate_order_receipt_pdf
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask import Flask, render_template, url_for, redirect, request, session, send_file, abort
 
 # Use ONLY these helpers for DB access
-from sqlQueries import create_connection, close_connection, fetch_one, fetch_all, execute_query
+from proj2.sqlQueries import create_connection, close_connection, fetch_one, fetch_all, execute_query
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_secret_key_here'

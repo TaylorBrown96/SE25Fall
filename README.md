@@ -1,7 +1,7 @@
 # Food Delivery — Flask Backend
 
-[![CI](https://img.shields.io/github/actions/workflow/status/<TaylorBrown96>/<SE25Fall>/ci.yml?branch=main)](https://github.com/<TaylorBrown96>/<SE25Fall>/actions)
-[![Docs](https://img.shields.io/github/actions/workflow/status/<TaylorBrown96>/<SE25Fall>/docs.yml?label=docs)](https://github.com/<TaylorBrown96>/<SE25Fall>/actions)
+[![CI](https://img.shields.io/github/actions/workflow/status/TaylorBrown96/SE25Fall/ci.yml?branch=main)](https://github.com/TaylorBrown96/SE25Fall/actions)
+[![Docs](https://img.shields.io/github/actions/workflow/status/TaylorBrown96/SE25Fall/docs.yml?label=docs)](https://github.com/TaylorBrown96/SE25Fall/actions)
 [![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)]()
 
 ---

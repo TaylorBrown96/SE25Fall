@@ -8,7 +8,7 @@ from reportlab.lib.units import inch
 from reportlab.pdfgen import canvas
 from reportlab.lib import colors
 
-from sqlQueries import create_connection, close_connection, fetch_one, fetch_all
+from proj2.sqlQueries import create_connection, close_connection, fetch_one, fetch_all
 
 def _safe_str(x):
     return "" if x is None else str(x)
