@@ -78,6 +78,9 @@
                     <a class="function" href="#orders">orders</a>
             </li>
             <li>
+                    <a class="function" href="#restaurants">restaurants</a>
+            </li>
+            <li>
                     <a class="function" href="#order_receipt">order_receipt</a>
             </li>
             <li>
@@ -171,7 +174,7 @@ Returns:
     </div>
     <a class="headerlink" href="#fetch_menu_items_by_ids"></a>
     
-            <div class="docstring"><p>Returns {itm_id: {..., 'restaurant_name': str}}</p>
+            <div class="docstring"><p>Returns {itm_id: {..., 'restaurant_name': str, 'restaurant_address': str, 'restaurant_hours': str, 'restaurant_phone': str}}</p>
 </div>
 
 
@@ -315,6 +318,20 @@ Returns cells where each day has a 'meals' list (sorted Breakfast->Dinner).</p>
         
     </div>
     <a class="headerlink" href="#orders"></a>
+    
+    
+
+                </section>
+                <section id="restaurants">
+                    <div class="attr function">
+                    <div class="decorator decorator-app.route">@app.route(&#39;/restaurants&#39;)</div>
+
+        <span class="def">def</span>
+        <span class="name">restaurants</span><span class="signature pdoc-code condensed">(<span class="return-annotation">):</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#restaurants"></a>
     
     
 
