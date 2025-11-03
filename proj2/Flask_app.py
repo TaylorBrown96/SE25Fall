@@ -69,7 +69,7 @@ def palette_for_item_ids(item_ids):
     return palette
 
 def fetch_menu_items_by_ids(ids):
-    """Returns {itm_id: {..., 'restaurant_name': str}}"""
+    """Returns {itm_id: {..., 'restaurant_name': str, 'restaurant_address': str, 'restaurant_hours': str, 'restaurant_phone': str}}"""
     if not ids:
         return {}
     conn = create_connection(db_file)
@@ -77,7 +77,8 @@ def fetch_menu_items_by_ids(ids):
         qmarks = ",".join(["?"] * len(ids))
         sql = f"""
           SELECT m.itm_id, m.rtr_id, m.name, m.description, m.price, m.calories,
-                 m.allergens, r.name AS restaurant_name
+                 m.allergens, r.name AS restaurant_name, r.address, r.city, r.state, r.zip,
+                 r.hours, r.phone
           FROM MenuItem m
           JOIN Restaurant r ON r.rtr_id = m.rtr_id
           WHERE m.itm_id IN ({qmarks})
@@ -85,6 +86,17 @@ def fetch_menu_items_by_ids(ids):
         rows = fetch_all(conn, sql, tuple(ids))
     finally:
         close_connection(conn)
+
+    def _addr(a, c, s, z) -> str:
+        parts_raw = [a, c, s, z]
+        parts = []
+        for p in parts_raw:
+            if p is None:
+                continue
+            sp = str(p).strip()
+            if sp:
+                parts.append(sp)
+        return ", ".join(parts)
 
     out = {}
     for r in rows:
@@ -97,6 +109,9 @@ def fetch_menu_items_by_ids(ids):
             "calories": r[5],
             "allergens": r[6],
             "restaurant_name": r[7],
+            "restaurant_address": _addr(r[8], r[9], r[10], r[11]),
+            "restaurant_hours": r[12] or "",
+            "restaurant_phone": r[13] or "",
         }
     return out
 
@@ -786,6 +801,61 @@ def orders():
 
     return render_template("orders.html", restaurants=rest_list, items=item_list)
 
+# Restaurants browse route
+@app.route('/restaurants')
+def restaurants():
+    if session.get('Username') is None:
+        return redirect(url_for('login'))
+
+    conn = create_connection(db_file)
+    try:
+        restaurants = fetch_all(conn, 'SELECT rtr_id, name, description, phone, email, address, city, state, zip, hours, status FROM "Restaurant"')
+        menu_items = fetch_all(conn, '''
+            SELECT itm_id, rtr_id, name, price, calories, allergens, description
+            FROM "MenuItem"
+            WHERE instock IS NULL OR instock = 1
+        ''')
+    finally:
+        close_connection(conn)
+
+    def _addr(a, c, s, z) -> str:
+        parts_raw = [a, c, s, z]
+        parts = []
+        for p in parts_raw:
+            if p is None:
+                continue
+            sp = str(p).strip()
+            if sp:
+                parts.append(sp)
+        return ", ".join(parts)
+
+    rest_list = [{
+        "rtr_id": r[0],
+        "name": r[1],
+        "description": r[2] or "",
+        "phone": r[3] or "",
+        "email": r[4] or "",
+        "address": r[5] or "",
+        "city": r[6] or "",
+        "state": r[7] or "",
+        "zip": r[8] if r[8] is not None else "",
+        "hours": r[9] or "",
+        "status": r[10] or "",
+        "address_full": _addr(r[5], r[6], r[7], r[8]),
+    } for r in restaurants]
+
+    item_list = [{
+        "itm_id":      m[0],
+        "rtr_id":      m[1],
+        "name":        m[2],
+        "price_cents": m[3] or 0,
+        "calories":    m[4] or 0,
+        "allergens":   m[5] or "",
+        "description": m[6] or "",
+    } for m in menu_items]
+
+    return render_template("restaurants.html", restaurants=rest_list, items=item_list)
+
 # Order receipt PDF route
 @app.route('/orders/<int:ord_id>/receipt.pdf')
 def order_receipt(ord_id: int):
@@ -880,3 +950,4 @@ if __name__ == '__main__':
     User: usr_id,first_name,last_name,email,phone,password_HS,wallet,preferences,allergies,generated_menu
     """
     app.run(debug=True)
+
