@@ -1,4 +1,8 @@
 import menu_generation as menu_generation
+from io import StringIO
+
+import pandas as pd
+
 
 generator = menu_generation.MenuGenerator()
 menu = generator.update_menu(menu = None, preferences = "high protein,low carb", allergens = "Peanuts,Shellfish", date = "2025-10-14", meal_number = 2)
