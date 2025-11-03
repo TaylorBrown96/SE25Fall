@@ -21,6 +21,35 @@
   </div>
 </header>
 
+<!-- Order Confirm Modal -->
+<div id="orderModal" class="order-modal" aria-hidden="true" role="dialog" aria-modal="true">
+  <div class="order-modal__backdrop"></div>
+  <div class="order-modal__dialog" role="document">
+    <div class="order-modal__head">
+      <h3 class="order-modal__title">Confirm your order</h3>
+      <button type="button" class="order-modal__close" aria-label="Close">&times;</button>
+    </div>
+    <div class="order-modal__body">
+      <div class="order-summary">
+        <div class="row"><span class="lbl">Restaurant</span><span class="val" id="om-rtr"></span></div>
+        <div class="row"><span class="lbl">Item</span><span class="val" id="om-item"></span></div>
+        <div class="row"><span class="lbl">Date</span><span class="val" id="om-date"></span></div>
+        <div class="row"><span class="lbl">Meal</span><span class="val" id="om-meal"></span></div>
+        <hr />
+        <div class="row"><span class="lbl">Subtotal</span><span class="val" id="om-subtotal"></span></div>
+        <div class="row"><span class="lbl">Tax</span><span class="val" id="om-tax"></span></div>
+        <div class="row"><span class="lbl">Delivery fee</span><span class="val" id="om-delivery"></span></div>
+        <div class="row"><span class="lbl">Service fee</span><span class="val" id="om-service"></span></div>
+        <div class="row total"><span class="lbl">Total</span><span class="val" id="om-total"></span></div>
+      </div>
+    </div>
+    <div class="order-modal__foot">
+      <button type="button" class="btn btn-outline" id="om-cancel">Cancel</button>
+      <button type="button" class="btn" id="om-confirm">Place order</button>
+    </div>
+  </div>
+</div>
+
 <main class="main">
   <div class="container">
     <div class="page-title" style="align-items:center; justify-content:space-between;">
@@ -109,16 +138,23 @@
                           <div class="tags">{{ m.item.description }}</div>
                         {% endif %}
 
-                        <!-- NEW: Order button per meal -->
                         <div class="actions" style="margin-top:8px;">
-                          <a
-                            class="order-btn"
-                            href="{{ url_for('order') }}?date={{ '%04d-%02d-%02d'|format(year, month, cell.day) }}&meal={{ m.meal }}&itm_id={{ m.item.itm_id }}"
-                            aria-label="Order {{ meal_names.get(m.meal, 'Meal') }}"
-                          >
-                            Order {{ meal_names.get(m.meal, 'Meal') }}
-                          </a>
-                        </div>
+                        <a
+                          class="order-btn"
+                          href="#"
+                          aria-label="Order {{ meal_names.get(m.meal, 'Meal') }}"
+                          data-itm-id="{{ m.item.itm_id }}"
+                          data-meal="{{ m.meal }}"
+                          data-date="{{ '%04d-%02d-%02d'|format(year, month, cell.day) }}"
+                          data-rtr-id="{{ m.item.rtr_id }}"
+                          data-rtr-name="{{ m.item.restaurant_name }}"
+                          data-item-name="{{ m.item.name }}"
+                          data-price-cents="{{ m.item.price }}"
+                          data-delivery-type="delivery"
+                        >
+                          Order {{ meal_names.get(m.meal, 'Meal') }}
+                        </a>
+                      </div>
                       </div>
                     {% endfor %}
                   </div>
@@ -214,10 +250,31 @@
   }
   .order-btn:hover { filter: brightness(1.08); }
   .order-btn:active { transform: translateY(1px); }
+
+  /* Modal */
+  .order-modal { position: fixed; inset: 0; display: none; z-index: 10000; }
+  .order-modal[aria-hidden="false"] { display: block; }
+  .order-modal__backdrop {
+    position: absolute; inset: 0; background: rgba(0,0,0,.55); backdrop-filter: blur(2px);
+  }
+  .order-modal__dialog {
+    position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+    width: min(520px, 92vw); background: #0e162b; color: #fff;
+    border: 1px solid rgba(255,255,255,.2); border-radius: 12px; box-shadow: 0 22px 45px rgba(0,0,0,.55);
+  }
+  .order-modal__head, .order-modal__foot { padding: 12px 14px; display:flex; align-items:center; justify-content:space-between; }
+  .order-modal__title { margin: 0; font-size: 1.05rem; }
+  .order-modal__close { background: transparent; border: none; color: #fff; font-size: 1.25rem; cursor: pointer; }
+  .order-modal__body { padding: 10px 14px 2px; }
+  .order-summary .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 6px 0; }
+  .order-summary .row.total { font-weight: 800; border-top: 1px dashed rgba(255,255,255,.2); margin-top: 6px; padding-top: 10px; }
+  .order-summary .lbl { opacity: .9; }
+  .order-summary hr { border: none; border-top: 1px solid rgba(255,255,255,.12); margin: 10px 0; }
 </style>
 
 <script>
 (function () {
+  // ======== Calendar Popover (existing) ========
   const popover = document.createElement('div');
   popover.className = 'menu-popover';
   const arrow = document.createElement('div');
@@ -295,18 +352,18 @@
   }
 
   const grid=document.querySelector('.cal-grid');
-  if(!grid) return;
+  if (grid) {
+    grid.addEventListener('mouseenter', e=>{
+      const cell=e.target.closest('.day-cell'); if(!cell) return;
+      clearTimeout(hideTimer);
+      showPopoverFor(cell);
+    }, true);
 
-  grid.addEventListener('mouseenter', e=>{
-    const cell=e.target.closest('.day-cell'); if(!cell) return;
-    clearTimeout(hideTimer);
-    showPopoverFor(cell);
-  }, true);
-
-  grid.addEventListener('mouseleave', e=>{
-    const cell=e.target.closest('.day-cell'); if(!cell) return;
-    hidePopover(false);
-  }, true);
+    grid.addEventListener('mouseleave', e=>{
+      const cell=e.target.closest('.day-cell'); if(!cell) return;
+      hidePopover(false);
+    }, true);
+  }
 
   popover.addEventListener('mouseenter', ()=>clearTimeout(hideTimer));
   popover.addEventListener('mouseleave', ()=>hidePopover(false));
@@ -318,8 +375,117 @@
   window.addEventListener('scroll', repositionIfNeeded, true);
   window.addEventListener('resize', repositionIfNeeded);
 
-  // Esc to close
+  // Esc to close popover
   window.addEventListener('keydown', e=>{ if(e.key==='Escape') hidePopover(true); });
+
+  // ======== Order Confirm Modal (new) ========
+  const modal = document.getElementById('orderModal');
+  if (!modal) return; // Modal markup must exist in the page
+
+  const omClose = modal.querySelector('.order-modal__close');
+  const omCancel = modal.querySelector('#om-cancel');
+  const omConfirm = modal.querySelector('#om-confirm');
+
+  const field = id => modal.querySelector('#' + id);
+  function dollars(n){ return '$' + (Number(n||0).toFixed(2)); }
+  function round2(x){ return Math.round((Number(x)||0)*100)/100; }
+
+  // Fallback computeTotals if global computeGroupTotals isn't present
+  function computeTotals(unitPrice, deliveryType){
+    const lines = [{ qty: 1, item: { unit_price: Number(unitPrice)||0 } }];
+    if (typeof window.computeGroupTotals === 'function') {
+      return window.computeGroupTotals(lines, deliveryType || 'delivery', 0);
+    }
+    const subtotal = round2(lines.reduce((a,l)=>a + (Number(l.qty||1)*Number(l.item.unit_price||0)), 0));
+    const tax = round2(subtotal * 0.0725);
+    const delivery_fee = (deliveryType==='pickup') ? 0.00 : 3.99;
+    const service_fee  = 1.49;
+    const tip = 0;
+    const total = round2(subtotal + tax + delivery_fee + service_fee + tip);
+    return { subtotal, tax, delivery_fee, service_fee, tip, total };
+  }
+
+  function openModal(){ modal.setAttribute('aria-hidden','false'); }
+  function closeModal(){ modal.setAttribute('aria-hidden','true'); }
+
+  omClose.addEventListener('click', closeModal);
+  omCancel.addEventListener('click', closeModal);
+  modal.addEventListener('click', (e)=>{ 
+    if (e.target === modal || e.target === modal.querySelector('.order-modal__backdrop')) closeModal(); 
+  });
+  window.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
+
+  let pendingOrder = null;
+
+  // Intercept clicks on any .order-btn (works for items inside the popover)
+  document.addEventListener('click', async (e) => {
+    const btn = e.target.closest('.order-btn');
+    if (!btn) return;
+    e.preventDefault();
+
+    // Gather data from button
+    const itmId = Number(btn.dataset.itmId);
+    const meal  = Number(btn.dataset.meal || 3);
+    const date  = btn.dataset.date;
+    const rtrId = Number(btn.dataset.rtrId);
+    const rtrName = btn.dataset.rtrName || '';
+    const itemName = btn.dataset.itemName || '';
+    const priceCents = Number(btn.dataset.priceCents || 0);
+    const deliveryType = (btn.dataset.deliveryType || 'delivery').toLowerCase();
+
+    const unitPrice = round2(priceCents / 100.0);
+    const totals = computeTotals(unitPrice, deliveryType);
+
+    // Fill modal fields
+    field('om-rtr').textContent = rtrName;
+    field('om-item').textContent = itemName + ' (x1)';
+    field('om-date').textContent = date;
+    field('om-meal').textContent = (meal===1 ? 'Breakfast' : meal===2 ? 'Lunch' : 'Dinner');
+
+    field('om-subtotal').textContent = dollars(totals.subtotal);
+    field('om-tax').textContent = dollars(totals.tax);
+    field('om-delivery').textContent = dollars(totals.delivery_fee);
+    field('om-service').textContent = dollars(totals.service_fee);
+    field('om-total').textContent = dollars(totals.total);
+
+    // Stash order payload for confirm
+    pendingOrder = {
+      restaurant_id: rtrId,
+      items: [{ itm_id: itmId, qty: 1 }],
+      delivery_type: deliveryType,
+      tip: 0,
+      eta_minutes: 40,
+      date,
+      meal
+    };
+
+    openModal();
+  });
+
+  omConfirm.addEventListener('click', async () => {
+    if (!pendingOrder) return;
+    try {
+      const res = await fetch('{{ url_for("order") }}', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(pendingOrder)
+      });
+      const data = await res.json();
+      if (data && data.ok) {
+        closeModal();
+        // redirect to profile with ?ordered=<id> like legacy flow
+        window.location.href = '{{ url_for("profile") }}' + (data.ord_id ? ('?ordered=' + data.ord_id) : '');
+      } else {
+        closeModal();
+        alert('Sorry, we could not place your order. Please try again.');
+      }
+    } catch (err) {
+      closeModal();
+      alert('Network error placing order.');
+    } finally {
+      pendingOrder = null;
+    }
+  });
 })();
 </script>
 
