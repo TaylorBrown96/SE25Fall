@@ -39,7 +39,7 @@ jobs:
           pip install pytest pytest-cov flask
 
       - name: Set PYTHONPATH
-        run: echo "PYTHONPATH=$PYTHONPATH:./proj2" >> $GITHUB_ENV
+        run: echo "PYTHONPATH=$GITHUB_WORKSPACE" >> $GITHUB_ENV
 
       - name: Run tests with coverage
         run: |
