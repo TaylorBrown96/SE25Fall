@@ -1,4 +1,5 @@
 ﻿name: CI
+
 on:
   push:
     branches: [ "main" ]
@@ -8,62 +9,93 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: proj2  # run everything from proj2/
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
-      - name: Install deps
+          python-version: "3.12"
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install -r proj2/requirements.txt
-      - name: Run tests (proj2)
+          set -e
+          pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          # ensure test deps even if not in requirements
+          pip install pytest pytest-cov flask
+
+      - name: Set PYTHONPATH
+        run: echo "PYTHONPATH=$PYTHONPATH:./proj2" >> $GITHUB_ENV
+
+      - name: Run tests with coverage
         run: |
-          export PYTHONPATH=$PYTHONPATH:./proj2
-          pytest -q --cov=proj2 --cov-report=xml --cov-report=term-missing
+          set -e
+          pytest
+        env:
+          PYTHONPATH: ${{ env.PYTHONPATH }}
+
+      - name: Upload coverage.xml as artifact (optional)
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-xml
+          path: proj2/coverage.xml
+          if-no-files-found: warn
+
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         with:
-          files: ./coverage.xml
-          fail_ci_if_error: false
-      - name: Build tests badge JSON
-        working-directory: proj2
+          token: ${{ secrets.CODECOV_TOKEN }}   # rotate & set in repo secrets
+          files: proj2/coverage.xml
+          flags: proj2
+          name: proj2-coverage
+          fail_ci_if_error: true
+          verbose: true
+
+      - name: Compute tests badge JSON
+        id: badge
+        if: always()  # update even on failures so the badge can go red
         run: |
-          REPORT="pytest-report.xml"
-          total=$(grep -c "<testcase" "$REPORT" || true)
-          failures=$(grep -c "<failure" "$REPORT" || true)
-          errors=$(grep -c "<error" "$REPORT" || true)
-          skipped=$(grep -c "<skipped" "$REPORT" || true)
-
-          # Treat “percent passed” as passed / (total - skipped)
-          runnable=$(( total - skipped ))
-          passed=$(( runnable - failures - errors ))
-          if [ "$runnable" -gt 0 ]; then
-            percent=$(( 100 * passed / runnable ))
+          OUT="$(pytest -q || true)"
+          PASSED=$(echo "$OUT" | grep -Eo '[0-9]+\s+passed' | awk '{print $1}' || echo 0)
+          FAILED=$(echo "$OUT" | grep -Eo '[0-9]+\s+failed' | awk '{print $1}' || echo 0)
+          if [ "${FAILED:-0}" != "0" ]; then
+            COLOR=critical
+            MSG="$PASSED passing, $FAILED failing"
           else
-            percent=100
+            COLOR=success
+            MSG="$PASSED passing"
           fi
+          BADGE=$(printf '{ "schemaVersion": 1, "label": "tests", "message": "%s", "color": "%s" }' "$MSG" "$COLOR")
+          echo "badge=${BADGE}" >> "$GITHUB_OUTPUT"
 
-          # Color thresholds
-          if [ "$percent" -ge 50 ]; then color="green";
-          elif [ "$percent" -ge 25 ]; then color="yellow";
-          else color="red"; fi
-
-          echo "Total: $total, Runnable: $runnable, Passed: $passed, Failed: $((failures+errors)), Skipped: $skipped, Percent: $percent%"
-
-          cat > tests-badge.json <<EOF
-          {
-            "schemaVersion": 1,
-            "label": "tests",
-            "message": "${percent}% passed",
-            "color": "${color}"
-          }
-          EOF
-      - name: Upload tests badge to Gist
-        uses: exuanbo/actions-deploy-gist@v1
+      - name: Update tests badge (gist)
+        if: always()
+        uses: actions/github-script@v7
+        env:
+          GIST_ID: e1b58ed5da17f8d2f5a83d3b36394d35
+          GIST_FILE: tests-badge.json
+          CONTENT: ${{ steps.badge.outputs.badge }}
         with:
-          token: ${{ secrets.GIST_TOKEN }}
-          gist_id: ${{ secrets.TESTS_BADGE_GIST_ID }}
-          file_path: proj2/tests-badge.json
-          file_type: text/plain
-
+          github-token: ${{ secrets.GIST_TOKEN }} # classic PAT with "gist" scope
+          script: |
+            const gist_id = process.env.GIST_ID;
+            const file = process.env.GIST_FILE;
+            const content = process.env.CONTENT || '{ "schemaVersion": 1, "label": "tests", "message": "0", "color": "inactive" }';
+            await github.rest.gists.update({
+              gist_id,
+              files: { [file]: { content } }
+            });

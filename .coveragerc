@@ -6,9 +6,12 @@ omit =
     */migrations/*
     */.venv/*
     */.pytest_cache/*
+    */tests/*
+    */config/*
+    */docs/*
 
 [report]
-fail_under = 25
+fail_under = 70
 show_missing = True
 skip_covered = True
 precision = 1
