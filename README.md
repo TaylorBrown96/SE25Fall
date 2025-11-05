@@ -95,20 +95,22 @@ Documentation is automatically generated using pdoc and deployed to GitHub Pages
 You can also generate and preview the documentation manually:
 ### Windows (PowerShell)
 ```powershell
-cd proj2
 # Temporarily add current directory to Python path
-$env:PYTHONPATH="." ; pdoc --docformat google --no-show-source -o site.
+$env:PYTHONPATH="." ;
+pdoc proj2 --no-show-source --template-dir proj2\pdoc_templates -o proj2\site
+python .\scripts\build_docs.py
 # View the documentation in your default browser
-explorer .\site\index.html
+start proj2\site\index.html
 ```
 
 ### MacOS / Linux (Bash/Zsh)
 ```bash
-cd proj2
 # Temporarily add current directory to Python path
-PYTHONPATH=. pdoc --docformat google --no-show-source -o site .
+export PYTHONPATH="."
+pdoc proj2 --no-show-source --template-dir proj2/pdoc_templates -o proj2/site
+python ./scripts/build_docs.py
 # View the documentation in your default browser
-open ./site/index.html
+open proj2/site/index.html
 ```
 
 The generated HTML files will be available in the `proj2/site` directory.
