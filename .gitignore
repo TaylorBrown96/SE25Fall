@@ -21,6 +21,7 @@ ENV/
 .idea/
 *.swp
 *.swo
+.vs/
 
 # OS junk
 .DS_Store

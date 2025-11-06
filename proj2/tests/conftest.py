@@ -1,4 +1,7 @@
-import os
+import os, sys
+ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
+if ROOT not in sys.path:
+    sys.path.insert(0, ROOT)
 import json
 import tempfile
 import contextlib
@@ -7,10 +10,10 @@ import pytest
 import sqlite3
 
 # Import your app module
-import proj2.Flask_app as Flask_app
+import Flask_app as Flask_app
 
 # Import your DB helpers
-from proj2.sqlQueries import create_connection, close_connection, execute_query, fetch_one, fetch_all
+from sqlQueries import create_connection, close_connection, execute_query, fetch_one, fetch_all
 
 from typing import Any, Optional, Sequence, Tuple
 
