@@ -39,12 +39,12 @@ jobs:
       - name: Check code formatting (Black)
         run: |
           set -e
-          black --check proj2
+          black --check .
 
       - name: Lint code (Ruff)
         run: |
           set -e
-          ruff check proj2
+          ruff check .
 
       - name: Set PYTHONPATH
         run: echo "PYTHONPATH=$GITHUB_WORKSPACE" >> $GITHUB_ENV
