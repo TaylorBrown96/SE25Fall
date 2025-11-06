@@ -10,10 +10,10 @@ import pytest
 import sqlite3
 
 # Import your app module
-import Flask_app as Flask_app
+import proj2.Flask_app as Flask_app
 
 # Import your DB helpers
-from sqlQueries import create_connection, close_connection, execute_query, fetch_one, fetch_all
+from proj2.sqlQueries import create_connection, close_connection, execute_query, fetch_one, fetch_all
 
 from typing import Any, Optional, Sequence, Tuple
 
