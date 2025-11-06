@@ -626,6 +626,7 @@ def test_MenuGenerator_full_duplicate():
     assert attempt_duplicate == menugenerator_multiple_days_multiple_meals_menu
 
 menugenerator_partial_duplicate = generator.update_menu(menu = menugenerator_multiple_days_multiple_meals_menu, preferences = "high protein,low carb", allergens = "Peanuts,Shellfish", date = "2025-10-14", meal_numbers = [2,3], number_of_days = 3)
+
 def test_MenuGenerator_partial_duplicate_no_regression():
     parse_original = parse_generated_menu(menugenerator_multiple_days_multiple_meals_menu)
     parse_partial_duplicate = parse_generated_menu(menugenerator_partial_duplicate)
@@ -646,5 +647,5 @@ def test_MenuGenerator_partial_duplicate_valid_items():
 def test_MenuGenerator_partial_duplicate_correct_meals():
     parse_partial_duplicate = parse_generated_menu(menugenerator_partial_duplicate)
 
-    assert parsed["2025-10-16"][0]["meal"] == 2
-    assert parsed["2025-10-16"][1]["meal"] == 3
+    assert parse_partial_duplicate["2025-10-16"][0]["meal"] == 2
+    assert parse_partial_duplicate["2025-10-16"][1]["meal"] == 3

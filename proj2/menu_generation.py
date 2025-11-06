@@ -299,7 +299,7 @@ LLM output:
                 if menu is None or len(menu) < 1:
                     itm_id = self.__pick_menu_item(preferences, allergens, current_weekday, meal_number)
                     menu = f"[{date},{itm_id},{meal_number}]"
-                elif not re.match(fr"\[{date},\d+,{meal_number}\]", menu):
+                elif re.search(fr"\[{date},\d+,{meal_number}\]", menu) is None:
                     print(fr"\[{date},\d+,{meal_number}\]")
                     print(menu)
                     itm_id = self.__pick_menu_item(preferences, allergens, current_weekday, meal_number)
