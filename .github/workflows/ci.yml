@@ -91,11 +91,27 @@ jobs:
           CONTENT: ${{ steps.badge.outputs.badge }}
         with:
           github-token: ${{ secrets.GIST_TOKEN }} # classic PAT with "gist" scope
-          script: |
-            const gist_id = process.env.GIST_ID;
-            const file = process.env.GIST_FILE;
-            const content = process.env.CONTENT || '{ "schemaVersion": 1, "label": "tests", "message": "0", "color": "inactive" }';
-            await github.rest.gists.update({
-              gist_id,
-              files: { [file]: { content } }
-            });
+              script: |
+                const gistId = process.env.GIST_ID;
+                const file = process.env.GIST_FILE;
+                let content = process.env.CONTENT;
+
+                // Fallback if previous step didn't set CONTENT
+                if (!content || !content.trim()) {
+                  content = JSON.stringify({
+                    schemaVersion: 1,
+                    label: "tests",
+                    message: "unknown",
+                    color: "inactive"
+                  });
+                }
+
+                // Ensure it's a string (not accidentally an object)
+                if (typeof content !== "string") {
+                  content = JSON.stringify(content);
+                }
+
+                await github.rest.gists.update({
+                  gist_id: gistId,
+                  files: { [file]: { content } }
+                });
