@@ -12,7 +12,9 @@ class LLM:
 
     ## LLM parameters
     device = "gpu" if torch.cuda.is_available() else "cpu"
-    model = "ibm-granite/granite-4.0-micro"
+
+    ## Set for testing - use "ibm-granite/granite-4.0-micro" or one of your choice during actual execution
+    model = "ibm-granite/granite-4.0-h-350M"
 
     """
     Initializes the LLM with the specified number of tokens
