@@ -10,16 +10,40 @@ from reportlab.lib import colors
 
 from proj2.sqlQueries import create_connection, close_connection, fetch_one, fetch_all
 
+
 def _safe_str(x):
+    """
+    Safely convert a value to string, avoiding None.
+    Args:
+        x (Any): The input value to convert.
+    Returns:
+        str: Empty string if None, otherwise stringified value.
+    """
     return "" if x is None else str(x)
 
+
 def _money(x):
+    """
+    Format a numeric value as a currency string.
+    Args:
+        x (float | int | str): The numeric amount to format.
+    Returns:
+        str: The value formatted as a dollar amount (e.g., "$12.34"), or empty string on failure.
+    """
     try:
         return f"${float(x):.2f}"
     except Exception:
         return ""
 
+
 def _dt_display(iso_str):
+    """
+    Format an ISO timestamp string into a readable form.
+    Args:
+        iso_str (str): ISO 8601 datetime string.
+    Returns:
+        str: A formatted timestamp 'YYYY-MM-DD HH:MM' or the original string if invalid.
+    """
     if not iso_str:
         return ""
     try:
@@ -27,11 +51,15 @@ def _dt_display(iso_str):
     except Exception:
         return iso_str
 
+
 def generate_order_receipt_pdf(db_file: str, ord_id: int) -> bytes:
     """
-    Build a PDF receipt for an order.
-    Uses only sqlQueries helpers to pull data.
-    Returns: bytes of the PDF.
+    Generate a PDF receipt for a given order.
+    Args:
+        db_file (str): Path to the SQLite database file.
+        ord_id (int): Order ID for which to generate the receipt.
+    Returns:
+        bytes: The binary PDF data as a bytes object.
     """
     conn = create_connection(db_file)
     try:
@@ -152,6 +180,14 @@ def generate_order_receipt_pdf(db_file: str, ord_id: int) -> bytes:
         # Charges
         c.setFont("Helvetica", 10)
         def row(label, value):
+            """
+            Draw a label-value row for a charge line.
+            Args:
+                label (str): Description of the charge (e.g., 'Tax', 'Subtotal').
+                value (float): Amount associated with the charge.
+            Returns:
+                None
+            """
             nonlocal y
             if value is None or value == "":
                 return
