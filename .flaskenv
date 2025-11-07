@@ -1,0 +1,1 @@
+FLASK_APP=proj2.Flask_app

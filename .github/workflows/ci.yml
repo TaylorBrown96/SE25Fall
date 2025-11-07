@@ -42,13 +42,6 @@ jobs:
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           pip install pytest pytest-timeout 
         
-      - name: heartbeat
-        run: |
-          for i in {1..90}; do
-            echo "tick $i"
-            sleep 1
-          done
-
       - name: Run tests with retry
         uses: nick-fields/retry@v3
         with:
