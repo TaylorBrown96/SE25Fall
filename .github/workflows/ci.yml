@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [ "main" ]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -35,7 +39,17 @@ jobs:
           set -e
           pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install pytest pytest-timeout 
         
+      - name: Run tests with retry
+        uses: nick-fields/retry@v3
+        with:
+          timeout_minutes: 25
+          max_attempts: 3
+          command: |
+            export PYTHONUNBUFFERED=1
+            stdbuf -oL -eL pytest -vv --log-cli-level=INFO --maxfail=1 --timeout=120 --durations=10
+
       - name: Check code formatting (Black)
         run: |
           set -e
@@ -126,3 +140,11 @@ jobs:
               gist_id: gistId,
               files: { [file]: { content } }
             });
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pytest-logs
+          path: |
+            ./**/pytest*.log
+            ./.pytest_cache/**/*
