@@ -181,9 +181,9 @@ def filter_closed_restaurants(restaurant: pd.DataFrame, weekday: str, time: int)
     return restaurant
 
 class MenuGenerator:
-"""
-MenuGenerator class that uses an LLM to generate menu items based on user preferences and restrictions
-"""
+    """
+    MenuGenerator class that uses an LLM to generate menu items based on user preferences and restrictions
+    """
     
     def __init__(self, tokens: int = 500):
         """
