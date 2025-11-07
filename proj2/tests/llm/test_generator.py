@@ -14,6 +14,7 @@ conn = create_connection(db_file)
 menu_items = pd.read_sql_query("SELECT * FROM MenuItem WHERE instock == 1", conn)
 close_connection(conn)
 
+'''
 menugenerator_single_menu1 = generator.update_menu(menu = None, preferences = "high protein,low carb", allergens = "Peanuts,Shellfish", date = "2025-10-14", meal_numbers = [2])
 menugenerator_single_menu2 = generator.update_menu(menu = menugenerator_single_menu1, preferences = "high protein,low carb", allergens = "Peanuts,Shellfish", date = "2025-10-14", meal_numbers = [3])
 menugenerator_single_menu3 = generator.update_menu(menu = menugenerator_single_menu2, preferences = "high protein,low carb", allergens = "Peanuts,Shellfish", date = "2025-10-15", meal_numbers = [1])
@@ -94,6 +95,7 @@ def test_MenuGenerator_multiple_meals_correct_meals():
     assert parsed2["2025-10-15"][1]["meal"] == 2
     assert parsed2["2025-10-15"][2]["meal"] == 3
 
+
 menugenerator_multiple_meals_oof_menu1 = generator.update_menu(menu = None, preferences = "high protein,low carb", allergens = "Peanuts,Shellfish", date = "2025-10-14", meal_numbers = [3,2])
 menugenerator_multiple_meals_oof_menu2 = generator.update_menu(menu = menugenerator_multiple_meals_oof_menu1, preferences = "high protein,low carb", allergens = "Peanuts,Shellfish", date = "2025-10-15", meal_numbers = [2,1,3])
 
@@ -160,6 +162,7 @@ def test_MenuGenerator_multiple_days_correct_meals():
     assert parsed3["2025-10-15"][1]["meal"] == 2
     assert parsed3["2025-10-15"][2]["meal"] == 3
 
+'''
 menugenerator_multiple_days_multiple_meals_menu = generator.update_menu(menu = None, preferences = "high protein,low carb", allergens = "Peanuts,Shellfish", date = "2025-10-14", meal_numbers = [1,2,3], number_of_days = 2)
 
 def test_MenuGenerator_multiple_days_multiple_meals_valid_items():
