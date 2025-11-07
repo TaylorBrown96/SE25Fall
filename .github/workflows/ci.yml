@@ -1,0 +1,117 @@
+﻿name: CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: proj2  # run everything from proj2/
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: |
+          set -e
+          pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          # ensure test deps even if not in requirements
+          pip install pytest pytest-cov flask
+
+      - name: Set PYTHONPATH
+        run: echo "PYTHONPATH=$GITHUB_WORKSPACE" >> $GITHUB_ENV
+
+      - name: Run tests with coverage
+        run: |
+          set -e
+          pytest
+        env:
+          PYTHONPATH: ${{ env.PYTHONPATH }}
+
+      - name: Upload coverage.xml as artifact (optional)
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-xml
+          path: proj2/coverage.xml
+          if-no-files-found: warn
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}   # rotate & set in repo secrets
+          files: proj2/coverage.xml
+          flags: proj2
+          name: proj2-coverage
+          fail_ci_if_error: true
+          verbose: true
+
+      - name: Compute tests badge JSON
+        id: badge
+        if: always()  # update even on failures so the badge can go red
+        run: |
+          OUT="$(pytest -q || true)"
+          PASSED=$(echo "$OUT" | grep -Eo '[0-9]+\s+passed' | awk '{print $1}' || echo 0)
+          FAILED=$(echo "$OUT" | grep -Eo '[0-9]+\s+failed' | awk '{print $1}' || echo 0)
+          if [ "${FAILED:-0}" != "0" ]; then
+            COLOR=critical
+            MSG="$PASSED passing, $FAILED failing"
+          else
+            COLOR=success
+            MSG="$PASSED passing"
+          fi
+          BADGE=$(printf '{ "schemaVersion": 1, "label": "tests", "message": "%s", "color": "%s" }' "$MSG" "$COLOR")
+          echo "badge=${BADGE}" >> "$GITHUB_OUTPUT"
+
+      - name: Update tests badge (gist)
+        if: always()
+        uses: actions/github-script@v7
+        env:
+          GIST_ID: 0c223cf33bf0cc9b91667676c415aafa
+          GIST_FILE: tests-badge.json
+          CONTENT: ${{ steps.badge.outputs.badge }}
+        with:
+          github-token: ${{ secrets.GIST_TOKEN }} # classic PAT with "gist" scope
+          script: |
+            const gistId = process.env.GIST_ID;
+            const file = process.env.GIST_FILE;
+            let content = process.env.CONTENT;
+
+            // Fallback if previous step didn't set CONTENT
+            if (!content || !content.trim()) {
+              content = JSON.stringify({
+                schemaVersion: 1,
+                label: "tests",
+                message: "unknown",
+                color: "inactive"
+              });
+            }
+
+            // Ensure it's a string (not accidentally an object)
+            if (typeof content !== "string") {
+              content = JSON.stringify(content);
+            }
+
+            await github.rest.gists.update({
+              gist_id: gistId,
+              files: { [file]: { content } }
+            });
