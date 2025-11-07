@@ -12,7 +12,8 @@ concurrency:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
     defaults:
       run:
         working-directory: proj2  # run everything from proj2/
@@ -41,6 +42,13 @@ jobs:
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           pip install pytest pytest-timeout 
         
+      - name: heartbeat
+        run: |
+          for i in {1..90}; do
+            echo "tick $i"
+            sleep 1
+          done
+
       - name: Run tests with retry
         uses: nick-fields/retry@v3
         with:
