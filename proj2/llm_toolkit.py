@@ -5,10 +5,11 @@ import time
 
 from proj2.sqlQueries import create_connection, close_connection, fetch_one, fetch_all, execute_query
 
+
+class LLM:
 """
 LLM class for local language model interactions
 """
-class LLM:
 
     ## LLM parameters
     device = "gpu" if torch.cuda.is_available() else "cpu"
@@ -16,13 +17,13 @@ class LLM:
     ## Set for testing - use "ibm-granite/granite-4.0-micro" or one of your choice during actual execution
     model = "ibm-granite/granite-4.0-h-350M"
 
-    """
-    Initializes the LLM with the specified number of tokens
-
-    Args:
-        tokens (int): The max number of generated characters
-    """
     def __init__(self, tokens: int = 500):
+        """
+        Initializes the LLM with the specified number of tokens
+
+        Args:
+            tokens (int): The max number of generated characters
+        """
         self.tokenizer = AutoTokenizer.from_pretrained(self.model, cache_dir=os.path.join(os.path.dirname(__file__), '.hf_cache'))
         # drop device_map if running on CPU
         if self.device == "cpu":    
@@ -30,17 +31,18 @@ class LLM:
         self.model.eval()
         self.tokens = tokens
 
-    """
-    Uses the local LLM to generate text based on the provided context and prompt
 
-    Args:
-        context (str): The system context to provide to the LLM
-        prompt (str): The user prompt to provide to the LLM  
-
-    Returns:
-        str: The raw, unformatted output from the LLM
-    """
     def generate(self, context: str, prompt: str) -> str:
+        """
+        Uses the local LLM to generate text based on the provided context and prompt
+
+        Args:
+            context (str): The system context to provide to the LLM
+            prompt (str): The user prompt to provide to the LLM  
+
+        Returns:
+            str: The raw, unformatted output from the LLM
+        """
         start = time.time()
         chat = [
             {"role": "system", "content": context},
