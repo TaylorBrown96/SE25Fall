@@ -9,6 +9,7 @@ omit =
     */tests/*
     */config/*
     */docs/*
+    */templates/*
 
 [report]
 fail_under = 80
