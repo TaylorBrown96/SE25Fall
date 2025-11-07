@@ -237,7 +237,7 @@ def login():
             session["Fname"] = user[1]
             session["Lname"] = user[2]
             session["Username"] = user[1] + " " + user[2]
-            session["Email"] = user[3]
+            session["Email"] = email
             session["Phone"] = user[4]
             session["Wallet"] = user[6]
             session["Preferences"] = user[7] if len(user) > 7 else ""
