@@ -3,7 +3,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 import os
 import time
 
-from sqlQueries import create_connection, close_connection, fetch_one, fetch_all, execute_query
+from proj2.sqlQueries import create_connection, close_connection, fetch_one, fetch_all, execute_query
 
 """
 LLM class for local language model interactions

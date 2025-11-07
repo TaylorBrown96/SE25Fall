@@ -7,8 +7,8 @@ import random
 import re
 from typing import Tuple, List
 
-import llm_toolkit as llm_toolkit
-from sqlQueries import *
+import proj2.llm_toolkit as llm_toolkit
+from proj2.sqlQueries import *
 
 db_file = os.path.join(os.path.dirname(__file__), 'CSC510_DB.db')
 

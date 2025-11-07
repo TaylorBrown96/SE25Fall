@@ -4,10 +4,10 @@ import os
 import pandas as pd
 from io import StringIO
 
-import menu_generation
-import llm_toolkit
-from sqlQueries import *
-from Flask_app import parse_generated_menu
+import proj2.menu_generation
+import proj2.llm_toolkit
+from proj2.sqlQueries import *
+from proj2.Flask_app import parse_generated_menu
 
 db_file = os.path.join(os.path.dirname(__file__), 'CSC510_DB.db')
 
