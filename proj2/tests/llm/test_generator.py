@@ -4,8 +4,8 @@ import os
 import pandas as pd
 from io import StringIO
 
-import proj2.menu_generation
-import proj2.llm_toolkit
+import proj2.menu_generation as menu_generation
+import proj2.llm_toolkit as llm_toolkit
 from proj2.sqlQueries import *
 from proj2.Flask_app import parse_generated_menu
 
