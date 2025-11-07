@@ -58,6 +58,11 @@ flask run
 flask run
 ```
 
+> [!IMPORTANT]  
+> If you have downloaded the repo locally and you're running into issues with
+> `proj2.` errors when trying to run `Flask_app.py`, simply remove `proj2.`
+> that is in front of any of the imports and try to run the application again.
+
 ---
 
 ## 🧪Running Tests
