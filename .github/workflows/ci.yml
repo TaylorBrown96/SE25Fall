@@ -78,12 +78,14 @@ jobs:
         id: badge
         if: always()  # update even on failures so the badge can go red
         run: |
-          OUT="$(pytest -q || true)"
-          PASSED=$(echo "$OUT" | grep -Eo '[0-9]+\s+passed' | awk '{print $1}' || echo 0)
-          FAILED=$(echo "$OUT" | grep -Eo '[0-9]+\s+failed' | awk '{print $1}' || echo 0)
+          OUT="$(pytest || true)"
+          SUMMARY=$(echo "$OUT" | grep -Eo '[0-9]+ (passed|failed|skipped|xfailed|xpassed)' | tr '\n' ' ')
+          PASSED=$(echo "$SUMMARY" | grep -Eo '[0-9]+ passed' | awk '{print $1}' || echo 0)
+          FAILED=$(echo "$SUMMARY" | grep -Eo '[0-9]+ failed' | awk '{print $1}' || echo 0)
+          TOTAL=$((PASSED + FAILED))
           if [ "${FAILED:-0}" != "0" ]; then
             COLOR=critical
-            MSG="$PASSED passing, $FAILED failing"
+            MSG="$PASSED/$TOTAL passing"
           else
             COLOR=success
             MSG="$PASSED passing"

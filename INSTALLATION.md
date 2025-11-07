@@ -21,7 +21,7 @@ py -3 -m venv .venv
 
 # 3️⃣ Install dependencies
 python -m pip install --upgrade pip
-pip install -r requirements.txt
+pip install -r proj2/requirements.txt
 ```
 
 ### 🐧MacOS / Linux (Bash/Zsh)
@@ -36,7 +36,7 @@ source .venv/bin/activate
 
 # 3️⃣ Install packages
 python -m pip install --upgrade pip
-pip install -r requirements.txt
+pip install -r proj2/requirements.txt
 ```
 
 ---
@@ -48,20 +48,14 @@ Once dependencies are installed and the virtual environment is activated, you ca
 
 ### 🪟Windows (PowerShell)
 ```powershell
-# Set the application entry point
-$env:FLASK_APP = "Flask_app.py"
-
 # Start the development server
-python -m flask run
+flask run
 ```
 
 ### 🐧MacOS / Linux (Bash/Zsh)
 ```bash
-# Set the application entry point
-export FLASK_APP="Flask_app.py"
-
 # Start the development server
-python -m flask run
+flask run
 ```
 
 ---
