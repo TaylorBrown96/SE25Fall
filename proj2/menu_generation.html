@@ -256,6 +256,19 @@
     </div>
     <a class="headerlink" href="#DINNER_TIME"></a>
     
+    
+
+                </section>
+                <section id="get_meal_and_order_time">
+                    <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">get_meal_and_order_time</span><span class="signature pdoc-code condensed">(<span class="param"><span class="n">meal_number</span><span class="p">:</span> <span class="nb">int</span></span><span class="return-annotation">) -> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#get_meal_and_order_time"></a>
+    
             <div class="docstring"><p>Maps a meal number to it's cooresponding meal as a string as well as its cooreponding meal time</p>
 
 <p>Args:
@@ -271,19 +284,6 @@
 
 
                 </section>
-                <section id="get_meal_and_order_time">
-                    <div class="attr function">
-            
-        <span class="def">def</span>
-        <span class="name">get_meal_and_order_time</span><span class="signature pdoc-code condensed">(<span class="param"><span class="n">meal_number</span><span class="p">:</span> <span class="nb">int</span></span><span class="return-annotation">) -> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span>:</span></span>
-
-        
-    </div>
-    <a class="headerlink" href="#get_meal_and_order_time"></a>
-    
-    
-
-                </section>
                 <section id="get_weekday_and_increment">
                     <div class="attr function">
             
@@ -294,7 +294,19 @@
     </div>
     <a class="headerlink" href="#get_weekday_and_increment"></a>
     
-    
+            <div class="docstring"><p>Converts a date string in YYYY-MM-DD format to the corresponding day of the week and returns the next date</p>
+
+<p>Args:
+    date (str): The date string in YYYY-MM-DD format</p>
+
+<p>Returns:
+    str: The next day, in YYYY-MM-DD format
+    str: The corresponding day of the week ("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")</p>
+
+<p>Raises:
+    ValueError: if the date string is not in the correct format (YYYY-MM-DD) or is invalid</p>
+</div>
+
 
                 </section>
                 <section id="format_llm_output">
@@ -307,7 +319,18 @@
     </div>
     <a class="headerlink" href="#format_llm_output"></a>
     
-    
+            <div class="docstring"><p>Grabs the LLM output and extracts the item ID from it</p>
+
+<p>Args:
+    output (str): The output from the llm_toolkit LLM</p>
+
+<p>Returns:
+    int: The item ID extracted from the LLM output</p>
+
+<p>Raises:
+    ValueError: if the LLM output does not match the expected format or if multiple matches are found</p>
+</div>
+
 
                 </section>
                 <section id="limit_scope">
@@ -320,7 +343,16 @@
     </div>
     <a class="headerlink" href="#limit_scope"></a>
     
-    
+            <div class="docstring"><p>Limits the number of items to ITEM_CHOICES by randomly selecting items if necessary</p>
+
+<p>Args:
+    items (pd.DataFrame): The DataFrame containing the items
+    num_choices (int): The maximum number of choices to return</p>
+
+<p>Returns:
+    List[int]: The list of item_ids of the selected items</p>
+</div>
+
 
                 </section>
                 <section id="filter_allergens">
@@ -333,7 +365,16 @@
     </div>
     <a class="headerlink" href="#filter_allergens"></a>
     
-    
+            <div class="docstring"><p>Filters out menu items that contain any of the specified allergens from the provided DataFrame</p>
+
+<p>Args:
+    menu_items (pd.DataFrame): The DataFrame containing the menu items
+    allergens (str): A comma-separated string of allergens to filter out</p>
+
+<p>Returns:
+    pd.DataFrame: The filtered DataFrame with menu items containing the specified allergens removed</p>
+</div>
+
 
                 </section>
                 <section id="filter_closed_restaurants">
@@ -346,7 +387,17 @@
     </div>
     <a class="headerlink" href="#filter_closed_restaurants"></a>
     
-    
+            <div class="docstring"><p>Filters out restaurants that are closed at the specified time on the specified weekday</p>
+
+<p>Args:
+    restaurant (pd.DataFrame): The DataFrame containing the restaurant data
+    weekday (str): The day of the week to check (e.g., "Mon", "Tue", etc.)
+    time (int): The time to check in HHMM format (24H time)</p>
+
+<p>Returns:
+    pd.DataFrame: The filtered DataFrame with closed restaurants removed</p>
+</div>
+
 
                 </section>
                 <section id="MenuGenerator">
@@ -359,12 +410,7 @@
     </div>
     <a class="headerlink" href="#MenuGenerator"></a>
     
-            <div class="docstring"><p>Initializes the MenuGenerator with menu items and restaurants from the database and initializes
-the local LLM.
-Args:
-    tokens (int): The number of tokens to use for the LLM generation</p>
-</div>
-
+    
 
                             <div id="MenuGenerator.__init__" class="classattr">
                                 <div class="attr function">
@@ -375,7 +421,13 @@ Args:
     </div>
     <a class="headerlink" href="#MenuGenerator.__init__"></a>
     
-    
+            <div class="docstring"><p>Initializes the MenuGenerator with menu items and restaurants from the database and initializes
+the local LLM.</p>
+
+<p>Args:
+    tokens (int): The number of tokens to use for the LLM generation</p>
+</div>
+
 
                             </div>
                             <div id="MenuGenerator.menu_items" class="classattr">
@@ -408,19 +460,7 @@ Args:
     </div>
     <a class="headerlink" href="#MenuGenerator.generator"></a>
     
-            <div class="docstring"><p>Generates the context block for the LLM based on the provided allergens, date, and order time</p>
-
-<p>Args:
-    allergens (str): A comma-separated string of allergens to filter out
-    weekday (str): The day of the week (e.g., "Mon", "Tue", etc.)
-    order_time (int): The time the meal is typically ordered at in HHMM format (in 24H time)
-    num_choices (int): The maximum number of choices to provide in the context
-    item_ids (List[int]): The list of item_ids passed - used for checking validity</p>
-
-<p>Returns:
-    str: The context block for the LLM in CSV format</p>
-</div>
-
+    
 
                             </div>
                             <div id="MenuGenerator.update_menu" class="classattr">
@@ -433,7 +473,20 @@ Args:
     </div>
     <a class="headerlink" href="#MenuGenerator.update_menu"></a>
     
-    
+            <div class="docstring"><p>Updates the menu string with a new menu item based on user preferences, allergens, date, and meal number</p>
+
+<p>Args:
+    menu (str): The current menu string (can be empty or None)
+    preferences (str): A comma-separated string of user preferences
+    allergens (str): A comma-separated string of allergens to avoid
+    date (str): The date string in YYYY-MM-DD format
+    meal_number (List[int]): The list of meal numbers to generate (1 for breakfast, 2 for lunch, 3 for dinner). e.g. [1,2,3]
+    number_of_days (int): The number of days to generate meals for, past the {date} specified</p>
+
+<p>Returns:
+    str: The updated menu string</p>
+</div>
+
 
                             </div>
                 </section>
