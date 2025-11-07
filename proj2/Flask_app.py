@@ -1,5 +1,7 @@
 import os
 import re
+import sys
+import argparse
 import math
 import json
 import calendar
@@ -1065,6 +1067,12 @@ def db_view():
         end=end,
     )
 
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Flask App for Meal Planner")
+    parser.add_argument('--host', type=str, default='127.0.0.1', help='Host to run the Flask app on')
+    parser.add_argument('--port', type=int, default=5000, help='Port to run the Flask app on')
+    return parser.parse_args()
+
 if __name__ == '__main__':
     """
     DB column names:
@@ -1075,4 +1083,5 @@ if __name__ == '__main__':
     Review: rev_id,rtr_id,usr_id,title,rating,description
     User: usr_id,first_name,last_name,email,phone,password_HS,wallet,preferences,allergies,generated_menu
     """
-    app.run(debug=True)
+    args = parse_args()
+    app.run(host=args.host, port=args.port, debug=True)
