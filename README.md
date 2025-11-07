@@ -1,4 +1,5 @@
-# Food Delivery — Flask Backend
+# 🍽️ WEEKLIES — Intelligent Meal Planning and Delivery System
+
 [![CI](https://github.com/TaylorBrown96/SE25Fall/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/TaylorBrown96/SE25Fall/actions/workflows/ci.yml)
 [![Docs](https://github.com/TaylorBrown96/SE25Fall/actions/workflows/docs.yml/badge.svg?branch=main&event=push)](https://github.com/TaylorBrown96/SE25Fall/actions/workflows/docs.yml)
 [![Python](https://img.shields.io/badge/Python-3.11%2B-blue.svg)]()
@@ -16,106 +17,113 @@
 [![DOI](https://zenodo.org/badge/1042386944.svg)](https://doi.org/10.5281/zenodo.17547176)
 ---
 
-## ⚙️Installation
+## 🧠 Project Overview
 
-### Windows (PowerShell)
-```powershell
-# 1) Clone
-git clone https://github.com/<TaylorBrown96>/<SE25Fall>.git
-cd <SE25Fall>/proj2
+**Weeklies** is a **full-stack Flask web application** developed as part of *CSC 510* : Software Engineering (Fall 2025, NC State University)*.  
+It models a modern food-delivery system where users can register, browse restaurants and menus, tag preferences, and schedule future meal orders via an integrated calendar.  
+The project demonstrates **modular backend design**, **frontend interaction**, **LLM-assisted personalization**, and **continuous documentation & testing pipelines**.
 
-# 2) Create & activate a venv
-py -3 -m venv .venv
+---
 
-# If activation is blocked, either:
-# a) temporary bypass: Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-# b) or use CMD activation script: .venv\Scripts\activate.bat
-. .\.venv\Scripts\Activate.ps1
+## ⚙️ Tech Stack
 
-# 3) Install packages
-python -m pip install --upgrade pip
-pip install -r requirements.txt
-```
+| Layer | Technologies | Key Focus |
+|-------|---------------|-----------|
+| **Frontend** | HTML, CSS, JavaScript (templated views) | Dynamic forms, order interaction, user calendar |
+| **Backend** | Python 3.11+, Flask 2.x | RESTful routes, modular blueprints, DB logic |
+| **Database** | SQLite / Flask-SQLAlchemy | Lightweight persistence for menus, users, orders |
+| **Automation** | GitHub Actions, pdoc, pytest, ruff, black | CI/CD, linting, testing, documentation |
+| **Intelligent Module** | OpenAI / LLM API | Personalized recommendations & reasoning |
+| **PDF Service** | ReportLab / FPDF | Automated PDF receipt generation |
 
-### MacOS / Linux (Bash/Zsh)
-```bash
-# 1) Clone the repository
-git clone https://github.com/<TaylorBrown96>/<SE25Fall>.git
-cd <SE25Fall>/proj2
+---
 
-# 2) Create & activate a venv
-python3 -m venv .venv
-source .venv/bin/activate
+## 🧩 Core Features
 
-# 3) Install packages
-python -m pip install --upgrade pip
-pip install -r requirements.txt
-```
+- 👤 **User registration & authentication**
+- 🍱 **Menu and restaurant search** with allergen + cuisine tagging
+- 🧭 **User preference tagging** and filtering
+- 📅 **Calendar-based scheduling** (order-on-selected-date logic)
+- 🧾 **Dynamic PDF receipt generation**
+- 🤖 **LLM integration** for context-aware meal suggestions
+- 🧪 **Automated test suite** with `pytest`
+- 🧰 **CI/CD workflows** for tests, linting, and documentation deployment
 
-## 🚀Usage
+---
 
-### Running the Application
-Once dependencies are installed and the virtual environment is activated, you can run the Flask server:
+## 🧱 Architecture
 
-### Windows (PowerShell)
-```powershell
-# Set the application entry point
-$env:FLASK_APP = "Flask_app.py"
+SE25Fall/   
+├── proj2/  
+│   ├── Flask_app.py    
+│   ├── app/    
+│   ├── templates/  
+│   ├── static/ 
+│   ├── pdf_receipt.py  
+│   ├── sqlQueries.py   
+│   ├── tests/  
+│   ├── scripts/    
+│   ├── requirements.txt    
+│   ├── CSC510_DB.db    
+│   └── orders_db_seed.txt  
+├── .github/    
+│   └── workflows/  
+│           ├── ci.yml  
+│           └── docs.yml    
+├── INSTALLATION.md   
+├── LICENSE   
+├── README.md     
+├── pytest.ini  
+├── pdoc.toml   
+└── coverage.xml    
 
-# Start the development server
-python -m flask run
-```
+---
 
-### MacOS / Linux (Bash/Zsh)
-```bash
-# Set the application entry point
-export FLASK_APP="Flask_app.py"
+## 🧪 Continuous Integration
 
-# Start the development server
-python -m flask run
-```
+Every push or pull request to the `main` branch triggers:
+1. **CI tests** via `pytest` and `coverage`  
+2. **Documentation build & deployment** to GitHub Pages (`gh-pages` branch)  
+3. **Static analysis** via `ruff` and `black` 
 
-### Running Tests
-Execute unit tests using pytest:
-```bash
-# For full information run:
-pytest
-# Add a '-q'(quiet) flag to show concise, easy-to-read output (dots for passes, 'F' for failures):
-pytest -q
-```
+You can view live status from the badges above.
 
-## 📚Documentation
+---
 
-### _Documentation is generated using pdoc._
-Documentation is automatically generated using pdoc and deployed to GitHub Pages whenever new changes are merged into the `main` branch.
+## 📚 Documentation
 
-### 🧩 Automated Docs
-* CI/CD workflow (`docs.yml`) builds and publishes docs from `proj2/` to the `gh-pages` branch.
+Auto-generated API documentation is available through **pdoc** and deployed automatically.  
+You can view it online (via GitHub Pages) or build it locally:
 
-* Live documentation becomes available at the GitHub Pages link after each successful merge.
+🔗 **Live Docs:** [Food Delivery Documentation](https://taylorbrown96.github.io/SE25Fall/)  
+🧰 **Local Build:** See [INSTALLATION.md](./INSTALLATION.md#7-build-documentation-locally)
 
-* Source code is hidden; only public functions, classes, and docstrings are shown.
+---
 
-### 🖥️ Build Docs Locally
-You can also generate and preview the documentation manually:
-### Windows (PowerShell)
-```powershell
-# Temporarily add current directory to Python path
-$env:PYTHONPATH="." ;
-pdoc proj2 --no-show-source --template-dir proj2\pdoc_templates -o proj2\site
-python .\scripts\build_docs.py
-# View the documentation in your default browser
-start proj2\site\index.html
-```
+## 🚀 Installation & Usage
 
-### MacOS / Linux (Bash/Zsh)
-```bash
-# Temporarily add current directory to Python path
-export PYTHONPATH="."
-pdoc proj2 --no-show-source --template-dir proj2/pdoc_templates -o proj2/site
-python ./scripts/build_docs.py
-# View the documentation in your default browser
-open proj2/site/index.html
-```
+Setup, environment creation, and execution instructions have been moved to a dedicated guide:  
+➡️ **[See Installation Guide →](./INSTALLATION.md)**
 
-The generated HTML files will be available in the `proj2/site` directory.
+---
+
+## 🤝 Team & 👥 Contributors
+Project developed collaboratively as part of **CSC 510 — Software Engineering (Fall 2025, NC State University)**.
+
+| Member | GitHub Handle | Key Contributions |
+|---------|----------------|-------------------|
+| **Taylor J. Brown** | [@TaylorBrown96](https://github.com/TaylorBrown96) | Led user authentication and preference management. Implemented menu tagging (allergens, cuisine types) and PDF receipt generation. Integrated JS calendar template for scheduling. Contributed to backend expansion and system testing. |
+| **Kunal Jindal** | [@devkunal2002](https://github.com/devkunal2002) | Designed and automated documentation pipeline using `pdoc`. Authored Installation Guide and main README. Set up CI/CD workflows, repository structure, and code quality badging. Contributed to backend testing and verification. |
+| **Ashritha Bugada** | — | Developed restaurant search, menu browsing, and ordering flow. Designed dynamic menu templates and integrated frontend-backend routes for order placement. Assisted with usability testing and validation. |
+| **Daniel Dong** | — | Implemented backend for calendar scheduling and integrated LLM module for personalized recommendations. Supported expansion of core Flask app and contributed to end-to-end feature debugging. |
+
+---
+
+## 📜 License
+Distributed under the MIT License.  
+See [LICENSE](./LICENSE) for more information.
+
+---
+
+> “Build software that’s clean, testable, and transparent not just functional.”
+
