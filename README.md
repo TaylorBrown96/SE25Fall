@@ -2,7 +2,7 @@
 [![CI](https://github.com/TaylorBrown96/SE25Fall/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/TaylorBrown96/SE25Fall/actions/workflows/ci.yml)
 [![Docs](https://github.com/TaylorBrown96/SE25Fall/actions/workflows/docs.yml/badge.svg?branch=main&event=push)](https://github.com/TaylorBrown96/SE25Fall/actions/workflows/docs.yml)
 [![Python](https://img.shields.io/badge/Python-3.11%2B-blue.svg)]()
-![Tests](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/TaylorBrown96/e1b58ed5da17f8d2f5a83d3b36394d35/raw/tests-badge.json)
+![Tests](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/TaylorBrown96/0c223cf33bf0cc9b91667676c415aafa/raw/tests-badge.json)
 [![codecov](https://codecov.io/gh/TaylorBrown96/SE25Fall/branch/main/graph/badge.svg)](https://codecov.io/gh/TaylorBrown96/SE25Fall)
 [![Flask](https://img.shields.io/badge/Flask-2.x-lightgrey?logo=flask&logoColor=white)](https://flask.palletsprojects.com/)
 [![License](https://img.shields.io/github/license/TaylorBrown96/SE25Fall.svg)](LICENSE)

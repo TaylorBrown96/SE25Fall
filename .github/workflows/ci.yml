@@ -86,7 +86,7 @@ jobs:
         if: always()
         uses: actions/github-script@v7
         env:
-          GIST_ID: e1b58ed5da17f8d2f5a83d3b36394d35
+          GIST_ID: 0c223cf33bf0cc9b91667676c415aafa
           GIST_FILE: tests-badge.json
           CONTENT: ${{ steps.badge.outputs.badge }}
         with:
