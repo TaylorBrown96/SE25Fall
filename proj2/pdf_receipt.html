@@ -66,9 +66,12 @@
     </div>
     <a class="headerlink" href="#generate_order_receipt_pdf"></a>
     
-            <div class="docstring"><p>Build a PDF receipt for an order.
-Uses only sqlQueries helpers to pull data.
-Returns: bytes of the PDF.</p>
+            <div class="docstring"><p>Generate a PDF receipt for a given order.
+Args:
+    db_file (str): Path to the SQLite database file.
+    ord_id (int): Order ID for which to generate the receipt.
+Returns:
+    bytes: The binary PDF data as a bytes object.</p>
 </div>
 
 

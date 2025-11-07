@@ -72,19 +72,17 @@
                     <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">create_connection</span><span class="signature pdoc-code condensed">(<span class="param"><span class="n">db_file</span></span><span class="return-annotation">):</span></span>
+        <span class="name">create_connection</span><span class="signature pdoc-code condensed">(<span class="param"><span class="n">db_file</span><span class="p">:</span> <span class="nb">str</span></span><span class="return-annotation">):</span></span>
 
         
     </div>
     <a class="headerlink" href="#create_connection"></a>
     
-            <div class="docstring"><p>Create a database connection to the SQLite database specified by db_file</p>
-
-<p>params:</p>
-
-<ul>
-<li>db_file: database file path</li>
-</ul>
+            <div class="docstring"><p>Create and return a connection to the specified SQLite database.
+Args:
+    db_file (str): Path to the SQLite database file.
+Returns:
+    sqlite3.Connection | None: Connection object if successful, None otherwise.</p>
 </div>
 
 
@@ -99,13 +97,11 @@
     </div>
     <a class="headerlink" href="#close_connection"></a>
     
-            <div class="docstring"><p>Close the database connection</p>
-
-<p>params:</p>
-
-<ul>
-<li>conn: Connection object</li>
-</ul>
+            <div class="docstring"><p>Close an existing SQLite database connection.
+Args:
+    conn (sqlite3.Connection): Connection object to close.
+Returns:
+    None</p>
 </div>
 
 
@@ -114,21 +110,19 @@
                     <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">execute_query</span><span class="signature pdoc-code condensed">(<span class="param"><span class="n">conn</span>, </span><span class="param"><span class="n">query</span>, </span><span class="param"><span class="n">params</span><span class="o">=</span><span class="p">()</span></span><span class="return-annotation">):</span></span>
+        <span class="name">execute_query</span><span class="signature pdoc-code condensed">(<span class="param"><span class="n">conn</span>, </span><span class="param"><span class="n">query</span><span class="p">:</span> <span class="nb">str</span>, </span><span class="param"><span class="n">params</span><span class="o">=</span><span class="p">()</span></span><span class="return-annotation">):</span></span>
 
         
     </div>
     <a class="headerlink" href="#execute_query"></a>
     
-            <div class="docstring"><p>Execute a single query</p>
-
-<p>params:</p>
-
-<ul>
-<li>conn: Connection object</li>
-<li>query: a SQL query</li>
-<li>params: a tuple of parameters to be used with the query</li>
-</ul>
+            <div class="docstring"><p>Execute a single SQL query with optional parameters.
+Args:
+    conn (sqlite3.Connection): Active database connection.
+    query (str): SQL query string to execute.
+    params (tuple, optional): Parameters to safely substitute into the query.
+Returns:
+    sqlite3.Cursor | None: Cursor object if successful, None if an error occurred.</p>
 </div>
 
 
@@ -137,21 +131,19 @@
                     <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">fetch_all</span><span class="signature pdoc-code condensed">(<span class="param"><span class="n">conn</span>, </span><span class="param"><span class="n">query</span>, </span><span class="param"><span class="n">params</span><span class="o">=</span><span class="p">()</span></span><span class="return-annotation">):</span></span>
+        <span class="name">fetch_all</span><span class="signature pdoc-code condensed">(<span class="param"><span class="n">conn</span>, </span><span class="param"><span class="n">query</span><span class="p">:</span> <span class="nb">str</span>, </span><span class="param"><span class="n">params</span><span class="o">=</span><span class="p">()</span></span><span class="return-annotation">):</span></span>
 
         
     </div>
     <a class="headerlink" href="#fetch_all"></a>
     
-            <div class="docstring"><p>Fetch all results from a query</p>
-
-<p>params:</p>
-
-<ul>
-<li>conn: Connection object</li>
-<li>query: a SQL query</li>
-<li>params: a tuple of parameters to be used with the query</li>
-</ul>
+            <div class="docstring"><p>Execute a query and return all fetched rows.
+Args:
+    conn (sqlite3.Connection): Active database connection.
+    query (str): SQL query string to execute.
+    params (tuple, optional): Parameters to safely substitute into the query.
+Returns:
+    list: A list of result rows (each as a tuple). Empty list if no results or on failure.</p>
 </div>
 
 
@@ -160,21 +152,19 @@
                     <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">fetch_one</span><span class="signature pdoc-code condensed">(<span class="param"><span class="n">conn</span>, </span><span class="param"><span class="n">query</span>, </span><span class="param"><span class="n">params</span><span class="o">=</span><span class="p">()</span></span><span class="return-annotation">):</span></span>
+        <span class="name">fetch_one</span><span class="signature pdoc-code condensed">(<span class="param"><span class="n">conn</span>, </span><span class="param"><span class="n">query</span><span class="p">:</span> <span class="nb">str</span>, </span><span class="param"><span class="n">params</span><span class="o">=</span><span class="p">()</span></span><span class="return-annotation">):</span></span>
 
         
     </div>
     <a class="headerlink" href="#fetch_one"></a>
     
-            <div class="docstring"><p>Fetch a single result from a query</p>
-
-<p>params:</p>
-
-<ul>
-<li>conn: Connection object</li>
-<li>query: a SQL query</li>
-<li>params: a tuple of parameters to be used with the query</li>
-</ul>
+            <div class="docstring"><p>Execute a query and return the first result row.
+Args:
+    conn (sqlite3.Connection): Active database connection.
+    query (str): SQL query string to execute.
+    params (tuple, optional): Parameters to safely substitute into the query.
+Returns:
+    tuple | None: The first row as a tuple, or None if no result or on failure.</p>
 </div>
 
 
