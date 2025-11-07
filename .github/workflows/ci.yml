@@ -2,7 +2,7 @@
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "**" ]
   pull_request:
     branches: [ "main" ]
 
@@ -12,7 +12,8 @@ concurrency:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
     defaults:
       run:
         working-directory: proj2  # run everything from proj2/
