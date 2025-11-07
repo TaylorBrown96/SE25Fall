@@ -11,7 +11,7 @@
 ```powershell
 # 1️⃣ Clone the repository
 git clone https://github.com/TaylorBrown96/SE25Fall.git
-cd SE25Fall/proj2
+cd SE25Fall
 
 # 2️⃣ Create and activate a virtual environment
 py -3 -m venv .venv
@@ -28,7 +28,7 @@ pip install -r proj2/requirements.txt
 ```bash
 # 1️⃣ Clone the repository
 git clone https://github.com/TaylorBrown96/SE25Fall.git
-cd SE25Fall/proj2
+cd SE25Fall
 
 # 2️⃣ Create & activate a venv
 python3 -m venv .venv
@@ -58,7 +58,7 @@ flask run
 flask run
 ```
 
-> [!IMPORTANT]  
+## [NOTE!]  
 > If you have downloaded the repo locally and you're running into issues with
 > `proj2.` errors when trying to run `Flask_app.py`, simply remove `proj2.`
 > that is in front of any of the imports and try to run the application again.
