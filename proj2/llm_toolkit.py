@@ -7,9 +7,6 @@ from proj2.sqlQueries import create_connection, close_connection, fetch_one, fet
 
 
 class LLM:
-"""
-LLM class for local language model interactions
-"""
 
     ## LLM parameters
     device = "gpu" if torch.cuda.is_available() else "cpu"
