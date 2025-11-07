@@ -25,6 +25,11 @@ The project demonstrates **modular backend design**, **frontend interaction**, *
 
 ---
 
+## 🎬 Live Demo
+👉 [Click here to watch the demo video on YouTube](https://youtu.be/CKCTOMVMst8)
+
+---
+
 ## ⚙️ Tech Stack
 
 | Layer | Technologies | Key Focus |
@@ -72,6 +77,7 @@ SE25Fall/
 │           └── docs.yml    
 ├── INSTALLATION.md   
 ├── LICENSE   
+├── CODE_OF_CONDUCT.md     
 ├── README.md   
 ├── scripts/       
 ├── pytest.ini  
@@ -108,7 +114,7 @@ Setup, environment creation, and execution instructions have been moved to a ded
 
 ---
 
-## 🤝 Team & 👥 Contributors
+##  👥 Team & Contributors
 Project developed collaboratively as part of **CSC 510 — Software Engineering (Fall 2025, NC State University)**.
 
 | Member | GitHub Handle | Key Contributions |
@@ -117,6 +123,12 @@ Project developed collaboratively as part of **CSC 510 — Software Engineering 
 | **Kunal Jindal** | [@devkunal2002](https://github.com/devkunal2002) | Designed and automated documentation pipeline using `pdoc`. Authored Installation Guide and main README. Set up CI/CD workflows, repository structure, and code quality badging. Contributed to backend testing and verification. |
 | **Ashritha Bugada** | — | Developed restaurant search, menu browsing, and ordering flow. Designed dynamic menu templates and integrated frontend-backend routes for order placement. Assisted with usability testing and validation. |
 | **Daniel Dong** | — | Implemented backend for calendar scheduling and integrated LLM module for personalized recommendations. Supported expansion of core Flask app and contributed to end-to-end feature debugging. |
+
+---
+
+## 🤝 Contributing
+We welcome contributions from everyone.  
+Please make sure to review our [Code of Conduct](CODE_OF_CONDUCT.md) before submitting pull requests.
 
 ---
 
