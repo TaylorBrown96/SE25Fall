@@ -208,6 +208,7 @@ class MenuGenerator:
         weekday (str): The day of the week (e.g., "Mon", "Tue", etc.)
         order_time (int): The time the meal is typically ordered at in HHMM format (in 24H time)
         num_choices (int): The maximum number of choices to provide in the context
+        item_ids (List[int]): The list of item_ids passed - used for checking validity
     
     Returns:
         str: The context block for the LLM in CSV format
@@ -229,13 +230,15 @@ class MenuGenerator:
         context_data = "item_id,name,description,price,calories\n"
         
         ## Create the context data with the chosen items
+        item_ids = []
         for x in choices:
             row = combined.iloc[x]
             context_data += f"{row['itm_id']},{row['name']},{row['description']},{row['price']},{row['calories']}\n"
+            item_ids.append(row['itm_id'])
 
         end = time.time()
         print("Context block generated in %.4f seconds" % (end - start))
-        return context_data
+        return context_data, item_ids
 
     """
     Picks a menu item based on user preferences, allergens, date, and meal number
@@ -257,7 +260,7 @@ class MenuGenerator:
 
         ## Tries to get output from LLM a number of times, increasing the number of options every time
         for x in range(MAX_LLM_TRIES):
-            context = self.__get_context(allergens, weekday, order_time, num_choices)
+            context, item_ids = self.__get_context(allergens, weekday, order_time, num_choices)
 
             ## Gets the prompt
             system = SYSTEM_TEMPLATE
@@ -270,7 +273,7 @@ class MenuGenerator:
 
             llm_output = self.generator.generate(system, prompt)
             output = format_llm_output(llm_output)
-            if output > 0:
+            if output > 0 and output in item_ids:
                 return output
             ## If failed, try increasing the number of choices
             num_choices += ITEM_CHOICES
