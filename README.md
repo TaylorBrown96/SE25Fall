@@ -55,14 +55,14 @@ The project demonstrates **modular backend design**, **frontend interaction**, *
 
 SE25Fall/   
 ├── proj2/  
-│   ├── Flask_app.py    
-│   ├── app/    
+│   ├── Flask_app.py       
 │   ├── templates/  
-│   ├── static/ 
+│   ├── static/  
 │   ├── pdf_receipt.py  
 │   ├── sqlQueries.py   
 │   ├── tests/  
-│   ├── scripts/    
+│   ├── llm_toolkit.py      
+│   ├── menu_generation.py       
 │   ├── requirements.txt    
 │   ├── CSC510_DB.db    
 │   └── orders_db_seed.txt  
@@ -72,7 +72,8 @@ SE25Fall/
 │           └── docs.yml    
 ├── INSTALLATION.md   
 ├── LICENSE   
-├── README.md     
+├── README.md   
+├── scripts/       
 ├── pytest.ini  
 ├── pdoc.toml   
 └── coverage.xml    

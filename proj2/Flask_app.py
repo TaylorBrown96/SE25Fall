@@ -22,12 +22,26 @@ db_file = os.path.join(os.path.dirname(__file__), 'CSC510_DB.db')
 # ---------------------- Helpers ----------------------
 
 def _money(x: float) -> float:
+    """
+    Safely round a numeric value to two decimal places.
+    Args:
+        x (float): The numeric amount to round.
+    Returns:
+        float: The amount rounded to two decimals, or 0.0 on failure.
+    """
     try:
         return round(float(x) + 1e-9, 2)
     except Exception:
         return 0.0
 
 def _cents_to_dollars(cents) -> float:
+    """
+    Convert an amount in cents to dollars with two-decimal precision.
+    Args:
+        cents (int | float | None): The value in cents to convert.
+    Returns:
+        float: The dollar value rounded to two decimals (0.0 on failure).
+    """
     try:
         return _money((cents or 0) / 100.0)
     except Exception:
@@ -35,10 +49,11 @@ def _cents_to_dollars(cents) -> float:
 
 def parse_generated_menu(gen_str):
     """
-    New format: [YYYY-MM-DD,ID,(1|2|3)]
-    Also supports old format [YYYY-MM-DD,ID] (meal defaults to 3 = Dinner).
+    Parse a serialized generated-menu string into a date-indexed structure.
+    Args:
+        gen_str (str): A string like "[YYYY-MM-DD,ID,(meal)]..." where meal is 1|2|3 (optional).
     Returns:
-      dict: { 'YYYY-MM-DD': [ {'itm_id': int, 'meal': int}, ... ] }
+        dict: Mapping 'YYYY-MM-DD' -> [{'itm_id': int, 'meal': int}, ...].
     """
     if not gen_str:
         return {}
@@ -56,7 +71,13 @@ def parse_generated_menu(gen_str):
     return out
 
 def palette_for_item_ids(item_ids):
-    """Deterministic pleasant color per item id"""
+    """
+    Generate a deterministic, pleasant color palette for item IDs.
+    Args:
+        item_ids (Iterable[int]): The menu item IDs to colorize.
+    Returns:
+        dict: Mapping itm_id -> hex color string (e.g., '#a1b2c3').
+    """
     import colorsys
     def hsl_to_hex(h, s, l):
         r, g, b = colorsys.hls_to_rgb(h/360.0, l/100.0, s/100.0)
@@ -69,7 +90,14 @@ def palette_for_item_ids(item_ids):
     return palette
 
 def fetch_menu_items_by_ids(ids):
-    """Returns {itm_id: {..., 'restaurant_name': str, 'restaurant_address': str, 'restaurant_hours': str, 'restaurant_phone': str}}"""
+    """
+    Load menu items (and their restaurant metadata) for given item IDs.
+    Args:
+        ids (Iterable[int]): The item IDs to fetch.
+    Returns:
+        dict: Mapping itm_id -> dict with fields like name, price, calories, allergens,
+            and restaurant info (name, address, hours, phone).
+    """
     if not ids:
         return {}
     conn = create_connection(db_file)
@@ -118,8 +146,14 @@ def fetch_menu_items_by_ids(ids):
 
 def build_calendar_cells(gen_map, year, month, items_by_id):
     """
-    gen_map: {'YYYY-MM-DD': [ {'itm_id': int, 'meal': 1|2|3}, ... ]}
-    Returns cells where each day has a 'meals' list (sorted Breakfast->Dinner).
+    Build month-view calendar cells enriched with menu items per day.
+    Args:
+        gen_map (dict): Mapping 'YYYY-MM-DD' -> [{'itm_id': int, 'meal': 1|2|3}, ...].
+        year (int): The calendar year.
+        month (int): The calendar month (1–12).
+        items_by_id (dict): Mapping itm_id -> item detail dict from DB.
+    Returns:
+        list: A flat list of calendar cell dicts with day number and a 'meals' list.
     """
     def meal_sort_key(e):
         # Breakfast(1) first, then Lunch(2), then Dinner(3)
@@ -160,6 +194,14 @@ def build_calendar_cells(gen_map, year, month, items_by_id):
 @app.route('/', defaults={'year': None, 'month': None})
 @app.route('/<int:year>/<int:month>')
 def index(year, month):
+    """
+    Render the calendar home view for the current or specified month.
+    Args:
+        year (int | None): Optional year path parameter.
+        month (int | None): Optional month path parameter (1–12).
+    Returns:
+        Response: HTML page showing the monthly plan and today's meals (requires login).
+    """
     if session.get("Username") is None:
         return redirect(url_for("login"))
 
@@ -222,6 +264,13 @@ def index(year, month):
 # Login route
 @app.route('/login', methods=['GET','POST'])
 def login():
+    """
+    Display the login form (GET) and authenticate user credentials (POST).
+    Args:
+        None
+    Returns:
+        Response: Renders login page, or redirects to home on successful login.
+    """
     if request.method == "POST":
         email = (request.form.get("email") or "").strip().lower()
         password = request.form.get("password") or ""
@@ -252,6 +301,13 @@ def login():
 # Logout route (single, no duplicates)
 @app.route('/logout')
 def logout():
+    """
+    Clear the user session and redirect to the login page.
+    Args:
+        None
+    Returns:
+        Response: Redirect to the login route.
+    """
     for k in ["Username","Fname","Lname","Email","Phone","Wallet","Preferences","Allergies","GeneratedMenu"]:
         session.pop(k, None)
     return redirect(url_for("login"))
@@ -259,6 +315,13 @@ def logout():
 # Registration route
 @app.route('/register', methods=['GET', 'POST'])
 def register():
+    """
+    Display the registration form (GET) and create a new user (POST).
+    Args:
+        None
+    Returns:
+        Response: Renders registration page or redirects to login on success.
+    """
     if request.method == 'POST':
         fname = (request.form.get('fname') or '').strip()
         lname = (request.form.get('lname') or '').strip()
@@ -314,6 +377,13 @@ def register():
 # Profile route
 @app.route('/profile')
 def profile():
+    """
+    Show the logged-in user's profile, including recent orders.
+    Args:
+        None
+    Returns:
+        Response: HTML profile page (requires login).
+    """
     # Must be logged in
     if session.get('Username') is None:
         return redirect(url_for('login'))
@@ -413,6 +483,13 @@ def profile():
 # Edit Profile route
 @app.route('/profile/edit', methods=['GET', 'POST'])
 def edit_profile():
+    """
+    Display and process the profile edit form (phone, preferences, allergies).
+    Args:
+        None
+    Returns:
+        Response: Renders form (GET) or updates and redirects to profile (POST).
+    """
     if session.get('Username') is None:
         return redirect(url_for('login'))
 
@@ -472,6 +549,13 @@ def edit_profile():
 
 @app.route('/profile/change-password', methods=['POST'])
 def change_password():
+    """
+    Change the current user's password after validating the current password.
+    Args:
+        None
+    Returns:
+        Response: Redirect back to profile with success or error flags.
+    """
     # Must be logged in
     if session.get('Username') is None:
         return redirect(url_for('login'))
@@ -532,6 +616,13 @@ def change_password():
 # Order route (Calendar "Order" button target)
 @app.route('/order', methods=['GET', 'POST'])
 def order():
+    """
+    Place an order via JSON (POST) or handle legacy single-item GET flow.
+    Args:
+        None
+    Returns:
+        Response: JSON with {'ok', 'ord_id'} on POST; redirects/HTML for legacy GET.
+    """
     # Must be logged in
     if session.get("Username") is None:
         return redirect(url_for("login"))
@@ -749,6 +840,13 @@ def order():
 # Orders route
 @app.route('/orders')
 def orders():
+    """
+    List restaurants and in-stock menu items for browsing.
+    Args:
+        None
+    Returns:
+        Response: HTML page showing restaurants and items (requires login).
+    """
     if session.get('Username') is None:
         return redirect(url_for('login'))
 
@@ -767,6 +865,13 @@ def orders():
     def _addr(a, c, s, z) -> str:
         """
         Safely join address parts that might be None/ints.
+        Args:
+            a (Any): Street address.
+            c (Any): City.
+            s (Any): State/region.
+            z (Any): Zip/postal code.
+        Returns:
+            str: A single formatted address string.
         """
         parts_raw = [a, c, s, z]
         parts = []
@@ -804,6 +909,13 @@ def orders():
 # Restaurants browse route
 @app.route('/restaurants')
 def restaurants():
+    """
+    Browse restaurants with details and currently in-stock items.
+    Args:
+        None
+    Returns:
+        Response: HTML page listing restaurants and their items (requires login).
+    """
     if session.get('Username') is None:
         return redirect(url_for('login'))
 
@@ -859,6 +971,13 @@ def restaurants():
 # Order receipt PDF route
 @app.route('/orders/<int:ord_id>/receipt.pdf')
 def order_receipt(ord_id: int):
+    """
+    Stream a PDF receipt for an order owned by the logged-in user.
+    Args:
+        ord_id (int): The order identifier in the path.
+    Returns:
+        Response: PDF file download or an error status (404/403) if inaccessible.
+    """
     # Must be logged in
     if session.get('Username') is None:
         return redirect(url_for('login'))
@@ -892,6 +1011,13 @@ def order_receipt(ord_id: int):
 # Database viewer route (uses helpers only)
 @app.route('/db')
 def db_view():
+    """
+    Display a simple, paginated database table viewer.
+    Args:
+        None
+    Returns:
+        Response: HTML page showing rows/columns for a selected table (requires login).
+    """
     if session.get('Username') is None:
         return redirect(url_for('login'))
 
@@ -950,4 +1076,3 @@ if __name__ == '__main__':
     User: usr_id,first_name,last_name,email,phone,password_HS,wallet,preferences,allergies,generated_menu
     """
     app.run(debug=True)
-
